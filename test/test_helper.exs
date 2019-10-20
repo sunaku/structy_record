@@ -15,22 +15,26 @@ defmodule StructyRecordTest.DefmoduleTestHelper do
             end
 
             def function(arg), do: arg
+
+            def function_using_macros(r = record()), do: r
           end
         end
 
         defmodule Test do
           use ExUnit.Case, async: true
-
-          require Setup.Record
+          use Setup.Record
 
           describe "defmodule()" do
             test "injects do..end block into module definition" do
               assert Setup.Record.macro(:ok) == :ok
               assert Setup.Record.function(:ok) == :ok
             end
-          end
 
-          require Setup.Record.StructyRecord
+            test "record() macros can be used in do..end block" do
+              record = Setup.Record.record()
+              assert record |> Setup.Record.function_using_macros() == record
+            end
+          end
 
           unquote(do_block)
         end

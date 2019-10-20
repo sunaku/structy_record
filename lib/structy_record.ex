@@ -7,6 +7,7 @@ defmodule StructyRecord do
     target_module = Module.concat([__CALLER__.module, name])
     record_module = Module.concat([target_module, :StructyRecord])
 
+    using_handler = using()
     record_macros = macros(record_module)
     field_getters = fields |> Enum.map(&getter(&1, record_module))
     field_setters = fields |> Enum.map(&setter(&1, record_module))
@@ -18,10 +19,22 @@ defmodule StructyRecord do
       end
 
       defmodule unquote(alias) do
+        unquote(using_handler)
         unquote(record_macros)
         unquote(field_getters)
         unquote(field_setters)
         unquote(do_block)
+      end
+    end
+  end
+
+  defp using do
+    quote do
+      defmacro __using__(_opts) do
+        quote do
+          require unquote(__MODULE__).StructyRecord
+          require unquote(__MODULE__)
+        end
       end
     end
   end
