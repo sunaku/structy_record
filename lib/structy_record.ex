@@ -16,16 +16,7 @@ defmodule StructyRecord do
       defmodule unquote(alias) do
         require unquote(record_module)
 
-        # name/0 to create a new record with default values for all fields
-        defmacro record() do
-          unquote(record_module).record()
-          |> Macro.escape()
-        end
-
-        # name/1 to create a new record with the given fields and values, to
-        # get the zero-based index of the given field in a record or to
-        # convert the given record to a keyword list
-        defmacro record(args) do
+        defmacro record(args \\ []) do
           quote do
             __this_is_overwritten_by_put_elem_below__(unquote(args))
           end
