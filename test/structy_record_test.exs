@@ -51,5 +51,12 @@ defmodule StructyRecordTest do
         assert record |> Setup.Record.one() == nil
       end
     end
+
+    describe "${field}/2" do
+      test "to assign a specific field in a given record" do
+        record = Setup.Record.record()
+        assert record |> Setup.Record.one(1) == Setup.Record.record(one: 1)
+      end
+    end
   end
 end
