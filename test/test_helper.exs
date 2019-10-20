@@ -8,20 +8,28 @@ defmodule StructyRecordTest.DefmoduleTestHelper do
           require StructyRecord
 
           StructyRecord.defmodule Record, unquote(fields) do
-            def my_function, do: :ok
+            defmacro macro(arg) do
+              quote do
+                unquote(arg)
+              end
+            end
+
+            def function(arg), do: arg
           end
         end
 
         defmodule Test do
           use ExUnit.Case, async: true
 
+          require Setup.Record
+
           describe "defmodule()" do
             test "injects do..end block into module definition" do
-              assert Setup.Record.my_function() == :ok
+              assert Setup.Record.macro(:ok) == :ok
+              assert Setup.Record.function(:ok) == :ok
             end
           end
 
-          require Setup.Record
           require Setup.Record.StructyRecord
 
           unquote(do_block)
