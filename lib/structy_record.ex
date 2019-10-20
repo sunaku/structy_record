@@ -7,8 +7,16 @@ defmodule StructyRecord do
     target_module = Module.concat([__CALLER__.module, name])
     record_module = Module.concat([target_module, :StructyRecord])
 
-    field_getters = fields |> Enum.map(&getter(&1, record_module))
-    field_setters = fields |> Enum.map(&setter(&1, record_module))
+    record_module_macro_call =
+      {
+        _call = :.,
+        _meta = [],
+        _args = [record_module, :record]
+      }
+      |> Macro.escape()
+
+    field_getters = fields |> Enum.map(&getter(&1, record_module_macro_call))
+    field_setters = fields |> Enum.map(&setter(&1, record_module_macro_call))
 
     quote do
       defmodule unquote(record_module) do
@@ -21,19 +29,24 @@ defmodule StructyRecord do
 
         defmacro record(args \\ []) do
           quote do
-            __this_is_overwritten_by_put_elem_below__(unquote(args))
+            call(unquote(args))
           end
-          |> put_elem(0, {:., [], [unquote(record_module), :record]})
+          |> case do
+            {_call, meta, args} ->
+              call = unquote(record_module_macro_call)
+              {call, meta, args}
+          end
         end
 
         defmacro record(record, args) do
           quote do
-            __this_is_overwritten_by_put_elem_below__(
-              unquote(record),
-              unquote(args)
-            )
+            call(unquote(record), unquote(args))
           end
-          |> put_elem(0, {:., [], [unquote(record_module), :record]})
+          |> case do
+            {_call, meta, args} ->
+              call = unquote(record_module_macro_call)
+              {call, meta, args}
+          end
         end
 
         unquote(field_getters)
@@ -44,7 +57,7 @@ defmodule StructyRecord do
     end
   end
 
-  defp getter(field, record_module) do
+  defp getter(field, record_module_macro_call) do
     quote do
       defmacro unquote(field)(record) do
         quote do
@@ -52,7 +65,7 @@ defmodule StructyRecord do
         end
         |> case do
           {_call, meta, _args = [record, :field]} ->
-            call = {:., [], [unquote(record_module), :record]}
+            call = unquote(record_module_macro_call)
             args = [record, unquote(field)]
             {call, meta, args}
         end
@@ -60,7 +73,7 @@ defmodule StructyRecord do
     end
   end
 
-  defp setter(field, record_module) do
+  defp setter(field, record_module_macro_call) do
     quote do
       defmacro unquote(field)(record, value) do
         quote do
@@ -68,7 +81,7 @@ defmodule StructyRecord do
         end
         |> case do
           {_call, meta, _args = [record, value]} ->
-            call = {:., [], [unquote(record_module), :record]}
+            call = unquote(record_module_macro_call)
             args = [record, [{unquote(field), value}]]
             {call, meta, args}
         end
