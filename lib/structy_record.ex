@@ -15,6 +15,7 @@ defmodule StructyRecord do
       }
       |> Macro.escape()
 
+    record_macros = macros(record_module, record_module_macro_call)
     field_getters = fields |> Enum.map(&getter(&1, record_module_macro_call))
     field_setters = fields |> Enum.map(&setter(&1, record_module_macro_call))
 
@@ -25,34 +26,38 @@ defmodule StructyRecord do
       end
 
       defmodule unquote(alias) do
-        require unquote(record_module)
-
-        defmacro record(args \\ []) do
-          quote do
-            call(unquote(args))
-          end
-          |> case do
-            {_call, meta, args} ->
-              call = unquote(record_module_macro_call)
-              {call, meta, args}
-          end
-        end
-
-        defmacro record(record, args) do
-          quote do
-            call(unquote(record), unquote(args))
-          end
-          |> case do
-            {_call, meta, args} ->
-              call = unquote(record_module_macro_call)
-              {call, meta, args}
-          end
-        end
-
+        unquote(record_macros)
         unquote(field_getters)
         unquote(field_setters)
-
         unquote(do_block)
+      end
+    end
+  end
+
+  defp macros(record_module, record_module_macro_call) do
+    quote do
+      require unquote(record_module)
+
+      defmacro record(args \\ []) do
+        quote do
+          call(unquote(args))
+        end
+        |> case do
+          {_call, meta, args} ->
+            call = unquote(record_module_macro_call)
+            {call, meta, args}
+        end
+      end
+
+      defmacro record(record, args) do
+        quote do
+          call(unquote(record), unquote(args))
+        end
+        |> case do
+          {_call, meta, args} ->
+            call = unquote(record_module_macro_call)
+            {call, meta, args}
+        end
       end
     end
   end
