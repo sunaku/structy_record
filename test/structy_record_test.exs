@@ -31,5 +31,18 @@ defmodule StructyRecordTest do
                  Setup.Record.StructyRecord.record(record)
       end
     end
+
+    describe "record/2" do
+      test "to access a given field in a given record" do
+        record = Setup.Record.record()
+        assert record |> Setup.Record.record(:one) == nil
+      end
+
+      test "to update an existing record with the given fields and values" do
+        record = Setup.Record.record()
+        updated_record = record |> Setup.Record.record(one: 1)
+        assert updated_record |> Setup.Record.record(:one) == 1
+      end
+    end
   end
 end

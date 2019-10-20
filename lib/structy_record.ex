@@ -23,6 +23,16 @@ defmodule StructyRecord do
           |> put_elem(0, {:., [], [unquote(record_module), :record]})
         end
 
+        defmacro record(record, args) do
+          quote do
+            __this_is_overwritten_by_put_elem_below__(
+              unquote(record),
+              unquote(args)
+            )
+          end
+          |> put_elem(0, {:., [], [unquote(record_module), :record]})
+        end
+
         unquote(do_block)
       end
     end
