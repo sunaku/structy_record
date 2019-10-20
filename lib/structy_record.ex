@@ -7,6 +7,8 @@ defmodule StructyRecord do
     target_module = Module.concat([__CALLER__.module, name])
     record_module = Module.concat([target_module, :StructyRecord])
 
+    field_getters = fields |> Enum.map(&getter(&1, record_module))
+
     quote do
       defmodule unquote(record_module) do
         require Record
@@ -33,7 +35,25 @@ defmodule StructyRecord do
           |> put_elem(0, {:., [], [unquote(record_module), :record]})
         end
 
+        unquote(field_getters)
+
         unquote(do_block)
+      end
+    end
+  end
+
+  defp getter(field, record_module) do
+    quote do
+      defmacro unquote(field)(record) do
+        quote do
+          call(unquote(record), :field)
+        end
+        |> case do
+          {_call, meta, _args = [record, :field]} ->
+            call = {:., [], [unquote(record_module), :record]}
+            args = [record, unquote(field)]
+            {call, meta, args}
+        end
       end
     end
   end

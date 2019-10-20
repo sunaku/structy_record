@@ -44,5 +44,12 @@ defmodule StructyRecordTest do
         assert updated_record |> Setup.Record.record(:one) == 1
       end
     end
+
+    describe "${field}/1" do
+      test "to access a specific field in a given record" do
+        record = Setup.Record.record()
+        assert record |> Setup.Record.one() == nil
+      end
+    end
   end
 end
