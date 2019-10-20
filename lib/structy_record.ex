@@ -22,6 +22,16 @@ defmodule StructyRecord do
           |> Macro.escape()
         end
 
+        # name/1 to create a new record with the given fields and values, to
+        # get the zero-based index of the given field in a record or to
+        # convert the given record to a keyword list
+        defmacro record(args) do
+          quote do
+            __this_is_overwritten_by_put_elem_below__(unquote(args))
+          end
+          |> put_elem(0, {:., [], [unquote(record_module), :record]})
+        end
+
         unquote(do_block)
       end
     end
