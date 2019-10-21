@@ -58,6 +58,13 @@ defmodule StructyRecordTest do
         assert record |> Setup.Record.one(1) == Setup.Record.record(one: 1)
       end
     end
+
+    describe "keypos/1" do
+      test "to get the 1-based index of the given field in a record" do
+        assert Setup.Record.keypos(:one) ==
+                 1 + Setup.Record.StructyRecord.record(:one)
+      end
+    end
   end
 
   describe_defmodule "field with default value", one: 1 do

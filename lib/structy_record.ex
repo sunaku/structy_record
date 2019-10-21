@@ -30,13 +30,16 @@ defmodule StructyRecord do
 
   defp macros(record_module, field_names) do
     using_handler = using_macro()
-    record_macros = record_macros(record_module)
+    record_macros = record_macros()
+    keypos_macros = keypos_macros()
     field_getters = field_names |> Enum.map(&getter_macro/1)
     field_setters = field_names |> Enum.map(&setter_macro/1)
 
     quote do
+      require unquote(record_module)
       unquote(using_handler)
       unquote(record_macros)
+      unquote(keypos_macros)
       unquote(field_getters)
       unquote(field_setters)
     end
@@ -53,10 +56,8 @@ defmodule StructyRecord do
     end
   end
 
-  defp record_macros(record_module) do
+  defp record_macros() do
     quote do
-      require unquote(record_module)
-
       defmacro record(args \\ []) do
         quote do
           unquote(__MODULE__).StructyRecord.record(unquote(args))
@@ -66,6 +67,16 @@ defmodule StructyRecord do
       defmacro record(record, args) do
         quote do
           unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(args))
+        end
+      end
+    end
+  end
+
+  defp keypos_macros() do
+    quote do
+      defmacro keypos(args) do
+        quote do
+          1 + unquote(__MODULE__).StructyRecord.record(unquote(args))
         end
       end
     end
