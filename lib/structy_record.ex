@@ -9,8 +9,8 @@ defmodule StructyRecord do
 
     using_handler = using()
     record_macros = macros(record_module)
-    field_getters = fields |> Enum.map(&getter(&1, record_module))
-    field_setters = fields |> Enum.map(&setter(&1, record_module))
+    field_getters = fields |> Enum.map(&getter/1)
+    field_setters = fields |> Enum.map(&setter/1)
 
     quote do
       defmodule unquote(record_module) do
@@ -45,64 +45,44 @@ defmodule StructyRecord do
 
       defmacro record(args \\ []) do
         quote do
-          call(unquote(args))
+          unquote(__MODULE__).StructyRecord.record(unquote(args))
         end
-        |> unquote(delegation(record_module))
       end
 
       defmacro record(record, args) do
         quote do
-          call(unquote(record), unquote(args))
+          unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(args))
         end
-        |> unquote(delegation(record_module))
       end
     end
   end
 
-  defp getter(field, record_module) do
+  defp getter(field) do
     quote do
       defmacro unquote(field)(record) do
         quote do
-          call(unquote(record), :field)
+          unquote(__MODULE__).StructyRecord.record(unquote(record), :field)
         end
         |> case do
           {call, meta, _args = [record, :field]} ->
             args = [record, unquote(field)]
             {call, meta, args}
         end
-        |> unquote(delegation(record_module))
       end
     end
   end
 
-  defp setter(field, record_module) do
+  defp setter(field) do
     quote do
       defmacro unquote(field)(record, value) do
         quote do
-          call(unquote(record), unquote(value))
+          unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(value))
         end
         |> case do
           {call, meta, _args = [record, value]} ->
             args = [record, [{unquote(field), value}]]
             {call, meta, args}
         end
-        |> unquote(delegation(record_module))
-      end
-    end
-  end
-
-  defp delegation(record_module) do
-    delegated_call =
-      {
-        _call = :.,
-        _meta = [],
-        _args = [record_module, :record]
-      }
-      |> Macro.escape()
-
-    quote do
-      case do
-        {_call, meta, args} -> {unquote(delegated_call), meta, args}
       end
     end
   end
