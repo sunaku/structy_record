@@ -82,4 +82,20 @@ defmodule StructyRecordTest do
       end
     end
   end
+
+  describe_defmodule "field name conflicts with macro", [:record, :keypos] do
+    describe "${field}/1" do
+      test "to access a specific field in a given record" do
+        record = Setup.Record.record()
+        assert Setup.Record.record(record) == [record: nil, keypos: nil]
+      end
+    end
+
+    describe "keypos/1" do
+      test "to get the 1-based index of the given field in a record" do
+        assert Setup.Record.keypos(:keypos) ==
+                 1 + Setup.Record.StructyRecord.record(:keypos)
+      end
+    end
+  end
 end

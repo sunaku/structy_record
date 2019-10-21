@@ -3,6 +3,8 @@ defmodule StructyRecord do
   Documentation for StructyRecord.
   """
 
+  @reserved_names [:record, :keypos]
+
   defmacro defmodule(alias = {:__aliases__, _line, [name]}, fields, do_block) do
     target_module = Module.concat([__CALLER__.module, name])
     record_module = Module.concat([target_module, :StructyRecord])
@@ -14,7 +16,7 @@ defmodule StructyRecord do
       end
 
       defmodule unquote(alias) do
-        unquote(macros(record_module, field_names(fields)))
+        unquote(macros(record_module, field_names(fields) -- @reserved_names))
         unquote(do_block)
       end
     end
