@@ -59,4 +59,20 @@ defmodule StructyRecordTest do
       end
     end
   end
+
+  describe_defmodule "field with default value", one: 1 do
+    describe "record/2" do
+      test "to access a given field in a given record" do
+        record = Setup.Record.record()
+        assert record |> Setup.Record.record(:one) == 1
+      end
+    end
+
+    describe "${field}/1" do
+      test "to access a specific field in a given record" do
+        record = Setup.Record.record()
+        assert record |> Setup.Record.one() == 1
+      end
+    end
+  end
 end

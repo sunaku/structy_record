@@ -9,8 +9,9 @@ defmodule StructyRecord do
 
     using_handler = using()
     record_macros = macros(record_module)
-    field_getters = fields |> Enum.map(&getter/1)
-    field_setters = fields |> Enum.map(&setter/1)
+    field_names = field_names(fields)
+    field_getters = field_names |> Enum.map(&getter/1)
+    field_setters = field_names |> Enum.map(&setter/1)
 
     quote do
       defmodule unquote(record_module) do
@@ -25,6 +26,14 @@ defmodule StructyRecord do
         unquote(field_setters)
         unquote(do_block)
       end
+    end
+  end
+
+  defp field_names(fields) do
+    if Keyword.keyword?(fields) do
+      Keyword.keys(fields)
+    else
+      fields
     end
   end
 
