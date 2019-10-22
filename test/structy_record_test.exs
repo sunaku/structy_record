@@ -2,6 +2,12 @@ defmodule StructyRecordTest do
   use ExUnit.Case
   doctest StructyRecord
 
+  describe "defmodule/2" do
+    test "the do..end block is optional" do
+      StructyRecord.defmodule(OptionalDoBlockTest, [])
+    end
+  end
+
   import StructyRecordTest.DefmoduleTestHelper
 
   describe_defmodule "no fields in record", [] do
@@ -103,8 +109,7 @@ defmodule StructyRecordTest do
 
       warnings =
         capture_io(:stderr, fn ->
-          StructyRecord.defmodule ReservedFieldsTest, [:record, :keypos] do
-          end
+          StructyRecord.defmodule(ReservedFieldsTest, [:record, :keypos])
         end)
 
       assert warnings =~ ~r/warning: .+Field name :record conflicts with .+/
