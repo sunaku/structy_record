@@ -3,7 +3,7 @@ defmodule StructyRecord do
   Documentation for StructyRecord.
   """
 
-  @reserved_names [:record, :keypos]
+  @reserved_field_names [:record, :keypos]
 
   defmacro defmodule(alias, fields, do_block) do
     quote do
@@ -65,14 +65,22 @@ defmodule StructyRecord do
   end
 
   defp access_macros(fields) do
-    field_names = field_names(fields) -- @reserved_names
-    field_getters = field_names |> Enum.map(&getter_macro/1)
-    field_setters = field_names |> Enum.map(&setter_macro/1)
+    {reserved_fields, allowed_fields} = reserved_vs_allowed_fields(fields)
+    warnings = reserved_fields |> Enum.map(&reserved_field_warning/1)
+    getters = allowed_fields |> Enum.map(&getter_macro/1)
+    setters = allowed_fields |> Enum.map(&setter_macro/1)
 
     quote do
-      unquote(field_getters)
-      unquote(field_setters)
+      unquote(warnings)
+      unquote(getters)
+      unquote(setters)
     end
+  end
+
+  defp reserved_vs_allowed_fields(fields) do
+    fields
+    |> field_names()
+    |> Enum.split_with(&reserved_field?/1)
   end
 
   defp field_names(fields) do
@@ -80,6 +88,20 @@ defmodule StructyRecord do
       Keyword.keys(fields)
     else
       fields
+    end
+  end
+
+  defp reserved_field?(name) do
+    name in @reserved_field_names
+  end
+
+  defp reserved_field_warning(field) do
+    quote do
+      IO.warn(
+        "(StructyRecord) Field name #{inspect(unquote(field))} conflicts with existing #{
+          inspect(__MODULE__)
+        }.#{unquote(field)}() macro, so field accessor macros will not be defined for this name."
+      )
     end
   end
 

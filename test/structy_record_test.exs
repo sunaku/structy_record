@@ -97,5 +97,18 @@ defmodule StructyRecordTest do
                  1 + Setup.Record.StructyRecord.record(:keypos)
       end
     end
+
+    test "warns about field names that conflict with reserved names" do
+      import ExUnit.CaptureIO
+
+      warnings =
+        capture_io(:stderr, fn ->
+          StructyRecord.defmodule ReservedFieldsTest, [:record, :keypos] do
+          end
+        end)
+
+      assert warnings =~ ~r/warning: .+Field name :record conflicts with .+/
+      assert warnings =~ ~r/warning: .+Field name :keypos conflicts with .+/
+    end
   end
 end
