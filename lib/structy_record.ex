@@ -5,21 +5,22 @@ defmodule StructyRecord do
 
   @reserved_names [:record, :keypos]
 
-  defmacro defmodule(alias = {:__aliases__, _line, [name]}, fields, do_block) do
-    target_module = Module.concat([__CALLER__.module, name])
-    record_module = Module.concat([target_module, :StructyRecord])
-
+  defmacro defmodule(alias, fields, do_block) do
     quote do
-      defmodule unquote(record_module) do
+      defmodule unquote(alias |> concat_alias([:StructyRecord])) do
         require Record
         Record.defrecord(:record, unquote(alias), unquote(fields))
       end
 
       defmodule unquote(alias) do
-        unquote(macros(record_module, field_names(fields) -- @reserved_names))
+        unquote(macros(field_names(fields) -- @reserved_names))
         unquote(do_block)
       end
     end
+  end
+
+  defp concat_alias({tag = :__aliases__, context, namespace}, appendix) do
+    {tag, context, namespace ++ appendix}
   end
 
   defp field_names(fields) do
@@ -30,7 +31,7 @@ defmodule StructyRecord do
     end
   end
 
-  defp macros(record_module, field_names) do
+  defp macros(field_names) do
     using_handler = using_macro()
     record_macros = record_macros()
     keypos_macros = keypos_macros()
@@ -38,7 +39,7 @@ defmodule StructyRecord do
     field_setters = field_names |> Enum.map(&setter_macro/1)
 
     quote do
-      require unquote(record_module)
+      require __MODULE__.StructyRecord
       unquote(using_handler)
       unquote(record_macros)
       unquote(keypos_macros)
