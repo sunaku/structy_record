@@ -13,7 +13,11 @@ defmodule StructyRecord do
       end
 
       defmodule unquote(alias) do
-        unquote(macros(field_names(fields) -- @reserved_names))
+        require __MODULE__.StructyRecord
+        unquote(using_macro())
+        unquote(record_macros())
+        unquote(keypos_macros())
+        unquote(access_macros(fields))
         unquote(do_block)
       end
     end
@@ -21,31 +25,6 @@ defmodule StructyRecord do
 
   defp concat_alias({tag = :__aliases__, context, namespace}, appendix) do
     {tag, context, namespace ++ appendix}
-  end
-
-  defp field_names(fields) do
-    if Keyword.keyword?(fields) do
-      Keyword.keys(fields)
-    else
-      fields
-    end
-  end
-
-  defp macros(field_names) do
-    using_handler = using_macro()
-    record_macros = record_macros()
-    keypos_macros = keypos_macros()
-    field_getters = field_names |> Enum.map(&getter_macro/1)
-    field_setters = field_names |> Enum.map(&setter_macro/1)
-
-    quote do
-      require __MODULE__.StructyRecord
-      unquote(using_handler)
-      unquote(record_macros)
-      unquote(keypos_macros)
-      unquote(field_getters)
-      unquote(field_setters)
-    end
   end
 
   defp using_macro do
@@ -82,6 +61,25 @@ defmodule StructyRecord do
           1 + unquote(__MODULE__).StructyRecord.record(unquote(args))
         end
       end
+    end
+  end
+
+  defp access_macros(fields) do
+    field_names = field_names(fields) -- @reserved_names
+    field_getters = field_names |> Enum.map(&getter_macro/1)
+    field_setters = field_names |> Enum.map(&setter_macro/1)
+
+    quote do
+      unquote(field_getters)
+      unquote(field_setters)
+    end
+  end
+
+  defp field_names(fields) do
+    if Keyword.keyword?(fields) do
+      Keyword.keys(fields)
+    else
+      fields
     end
   end
 
