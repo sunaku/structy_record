@@ -2,15 +2,15 @@ defmodule StructyRecordTest do
   use ExUnit.Case
   doctest StructyRecord
 
-  describe "defmodule/2" do
+  describe "defrecord/2" do
     test "the do..end block is optional" do
-      StructyRecord.defmodule(OptionalDoBlockTest, [])
+      StructyRecord.defrecord(OptionalDoBlockTest, [])
     end
   end
 
-  import StructyRecordTest.DefmoduleTestHelper
+  import StructyRecordTest.DefrecordTestHelper
 
-  describe_defmodule "no fields in record", [] do
+  describe_defrecord "no fields in record", [] do
     describe "record/0" do
       test "to create a new record with default values for all fields" do
         assert Setup.Record.record() |> elem(0) == Setup.Record
@@ -19,7 +19,7 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe_defmodule "one field in record", [:one] do
+  describe_defrecord "one field in record", [:one] do
     describe "record/1" do
       test "to create a new record with the given fields and values" do
         assert Setup.Record.record(one: 1) ==
@@ -74,7 +74,7 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe_defmodule "field with default value", one: 1 do
+  describe_defrecord "field with default value", one: 1 do
     describe "record/2" do
       test "to access a given field in a given record" do
         record = Setup.Record.record()
@@ -90,7 +90,7 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe_defmodule "field name conflicts with macro", [:record, :keypos] do
+  describe_defrecord "field name conflicts with macro", [:record, :keypos] do
     describe "${field}/1" do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
@@ -110,7 +110,7 @@ defmodule StructyRecordTest do
 
       warnings =
         capture_io(:stderr, fn ->
-          StructyRecord.defmodule(ReservedFieldsTest, [:record, :keypos])
+          StructyRecord.defrecord(ReservedFieldsTest, [:record, :keypos])
         end)
 
       assert warnings =~ ~r/warning: .+Field name :record conflicts with .+/

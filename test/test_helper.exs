@@ -1,13 +1,13 @@
 ExUnit.start()
 
-defmodule StructyRecordTest.DefmoduleTestHelper do
-  defmacro describe_defmodule(description, fields, do_block) do
+defmodule StructyRecordTest.DefrecordTestHelper do
+  defmacro describe_defrecord(description, fields, do_block) do
     quote do
       defmodule unquote(Module.concat([__MODULE__, description])) do
         defmodule Setup do
           require StructyRecord
 
-          StructyRecord.defmodule Record, unquote(fields) do
+          StructyRecord.defrecord Record, unquote(fields) do
             defmacro macro(arg) do
               quote do
                 unquote(arg)
@@ -24,7 +24,7 @@ defmodule StructyRecordTest.DefmoduleTestHelper do
           use ExUnit.Case, async: true
           use Setup.Record
 
-          describe "defmodule()" do
+          describe "defrecord/3" do
             test "injects do..end block into module definition" do
               assert Setup.Record.macro(:ok) == :ok
               assert Setup.Record.function(:ok) == :ok

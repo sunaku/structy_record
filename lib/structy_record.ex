@@ -5,7 +5,7 @@ defmodule StructyRecord do
 
   @reserved_field_names [:record, :keypos]
 
-  defmacro defmodule(alias, fields, do_block \\ []) do
+  defmacro defrecord(alias, fields, do_block \\ []) do
     quote do
       defmodule unquote(alias |> concat_alias([:StructyRecord])) do
         alias unquote(alias), as: Tag
