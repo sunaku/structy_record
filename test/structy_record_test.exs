@@ -13,6 +13,7 @@ defmodule StructyRecordTest do
   describe_defmodule "no fields in record", [] do
     describe "record/0" do
       test "to create a new record with default values for all fields" do
+        assert Setup.Record.record() |> elem(0) == Setup.Record
         assert Setup.Record.record() == Setup.Record.StructyRecord.record()
       end
     end

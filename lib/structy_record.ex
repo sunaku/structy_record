@@ -8,8 +8,9 @@ defmodule StructyRecord do
   defmacro defmodule(alias, fields, do_block \\ []) do
     quote do
       defmodule unquote(alias |> concat_alias([:StructyRecord])) do
+        alias unquote(alias), as: Tag
         require Record
-        Record.defrecord(:record, unquote(alias), unquote(fields))
+        Record.defrecord(:record, Tag, unquote(fields))
       end
 
       defmodule unquote(alias) do
