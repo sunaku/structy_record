@@ -3,7 +3,7 @@ defmodule StructyRecord do
   Documentation for StructyRecord.
   """
 
-  @reserved_field_names [:record, :keypos]
+  @reserved_field_names [:record, :record?, :keypos]
 
   defmacro defrecord(alias, fields, do_block \\ []) do
     quote do
@@ -52,6 +52,15 @@ defmodule StructyRecord do
           unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(args))
         end
       end
+
+      defmacro record?(record) do
+        quote do
+          match?(unquote(__MODULE__).StructyRecord.record(), unquote(record))
+        end
+      end
+
+      require Record
+      defguard is_record(record) when Record.is_record(record, __MODULE__)
     end
   end
 

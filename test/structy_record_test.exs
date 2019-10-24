@@ -17,6 +17,31 @@ defmodule StructyRecordTest do
         assert Setup.Record.record() == Setup.Record.StructyRecord.record()
       end
     end
+
+    describe "record?/1" do
+      test "checks if argument strictly matches the shape of this record" do
+        assert Setup.Record.record() |> Setup.Record.record?()
+        assert Setup.Record.StructyRecord.record() |> Setup.Record.record?()
+
+        refute {Setup.Record, :any_extra_field_is_also_checked_by_this_macro}
+               |> Setup.Record.record?()
+      end
+    end
+
+    describe "is_record/1" do
+      test "checks if argument loosely matches the shape of this record" do
+        assert_is_record(Setup.Record.record())
+        assert_is_record(Setup.Record.StructyRecord.record())
+        assert_is_record({Setup.Record, :extra_field_is_NOT_checked_by_guard})
+      end
+
+      defp assert_is_record(record) do
+        case record do
+          ^record when Setup.Record.is_record(record) -> :ok
+          other -> flunk("didn't match #{inspect(other)}")
+        end
+      end
+    end
   end
 
   describe_defrecord "one field in record", [:one] do
@@ -90,11 +115,12 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe_defrecord "field name conflicts with macro", [:record, :keypos] do
+  describe_defrecord "field name conflicts with macro", [:record, :record?, :keypos] do
     describe "${field}/1" do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
-        assert Setup.Record.record(record) == [record: nil, keypos: nil]
+        assert Setup.Record.record(record) == Setup.Record.StructyRecord.record(record)
+        assert Setup.Record.record?(record) == match?(Setup.Record.StructyRecord.record(), record)
       end
     end
 
@@ -110,10 +136,11 @@ defmodule StructyRecordTest do
 
       warnings =
         capture_io(:stderr, fn ->
-          StructyRecord.defrecord(ReservedFieldsTest, [:record, :keypos])
+          StructyRecord.defrecord(ReservedFieldsTest, [:record, :record?, :keypos])
         end)
 
       assert warnings =~ ~r/warning: .+Field name :record conflicts with .+/
+      assert warnings =~ ~r/warning: .+Field name :record\? conflicts with .+/
       assert warnings =~ ~r/warning: .+Field name :keypos conflicts with .+/
     end
   end
