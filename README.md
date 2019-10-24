@@ -1,6 +1,15 @@
 # StructyRecord
 
-**TODO: Add description**
+`StructyRecord` provides a Struct-like interface for your `Record`s.
+
+- Use your record's macros in the _same module_ where it is defined!
+- Access and update fields in your record through named macro calls.
+- Create and update records at runtime (not limited to compile time).
+- Calculate 1-based indexes to access record fields in `:ets` tables.
+
+To get started, see the documentation for `StructyRecord.defrecord/3`:
+
+    iex> h StructyRecord.defrecord
 
 ## Installation
 

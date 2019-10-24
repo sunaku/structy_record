@@ -1,10 +1,128 @@
 defmodule StructyRecord do
   @moduledoc """
-  Documentation for StructyRecord.
+
+  `StructyRecord` provides a Struct-like interface for your `Record`s.
+
+  - Use your record's macros in the _same module_ where it is defined!
+  - Access and update fields in your record through named macro calls.
+  - Create and update records at runtime (not limited to compile time).
+  - Calculate 1-based indexes to access record fields in `:ets` tables.
+
   """
 
   @reserved_field_names [:record, :record!, :record?, :keypos]
 
+  @doc """
+  Defines a module named `alias` that is also a `Record` composed of `fields`.
+
+  ## Parameters
+
+  - `alias` is the name of the module being defined.  It also serves as the
+  `tag` parameter of `Record.defrecord/3`, which helps identify the record.
+
+  - `fields` specifies the shape of the record being defined.  It is either:
+    - a list of `Atom` field names whose default values are always `nil`
+    - a `Keyword` list of field names along with their own default values
+
+  - `do_block` is an optional block of code that is passed into `defmodule/2`.
+  It allows you to extend the module being defined with your own custom code,
+  which has compile-time access to all the guards and macros described below.
+
+  ## Results
+
+  The defined module provides the following guards, macros, and functions.
+
+  Guards:
+  - `is_record/1` to check if argument _loosely_ matches this record's shape
+
+  Macros:
+  - `record?/1` to check if argument _strictly_ matches this record's shape
+  - `record/0` to create a new record with default values for all fields
+  - `record/1` to create a new record with the given fields and values
+  - `record/1` to get the zero-based index of the given field in a record
+  - `record/1` to convert the given record into a `Keyword` list
+  - `record/2` to get the value of a given field in a given record
+  - `record/2` to update an existing record with the given fields and values
+  - `${field}/1` to get the value of a specific field in a given record
+  - `${field}/2` to set the value of a specific field in a given record
+  - `keypos/1` to get the 1-based index of the given field in a record
+
+  Functions:
+  - `record!/1` to create a new record _at runtime_ with the given fields and values
+  - `record!/2` to update an existing record with the given fields and values
+
+  ## Examples
+
+  Activate this macro in your environment:
+
+      require StructyRecord
+
+  Define a structy record for a rectangle:
+
+      StructyRecord.defrecord Rectangle, [:width, :height] do
+        def area(r=record()) do
+          width(r) * height(r)
+        end
+
+        def perimeter(record(width: w, height: h)) do
+          2 * (w + h)
+        end
+
+        def square?(record(width: same, height: same)), do: true
+        def square?(_), do: false
+      end
+
+  Activate its macros in your environment:
+
+      use Rectangle
+
+  Create instances of your structy record:
+
+      rect = Rectangle.record()                      #-> {Rectangle, nil, nil}
+      no_h = Rectangle.record(width: 1)              #-> {Rectangle, 1, nil}
+      no_w = Rectangle.record(height: 2)             #-> {Rectangle, nil, 2}
+      wide = Rectangle.record(width: 10, height: 5)  #-> {Rectangle, 10, 5}
+      tall = Rectangle.record(width:  4, height: 25) #-> {Rectangle, 4, 25}
+      even = Rectangle.record(width: 10, height: 10) #-> {Rectangle, 10, 10}
+
+  Get values of fields in those instances:
+
+      tall |> Rectangle.height()            #-> 25
+      tall |> Rectangle.record(:height)     #-> 25
+      Rectangle.record(height: h) = tall; h #-> 25
+
+  Set values of fields in those instances:
+
+      even |> Rectangle.width(1)         #-> {Rectangle, 1, 10}
+      even |> Rectangle.record(width: 1) #-> {Rectangle, 1, 10}
+
+      even |> Rectangle.width(1) |> Rectangle.height(2) #-> {Rectangle, 1, 2}
+      even |> Rectangle.record(width: 1, height: 2)     #-> {Rectangle, 1, 2}
+
+  Use your custom code on those instances:
+
+      rect |> Rectangle.area() #-> (ArithmeticError) bad argument in arithmetic expression: nil * nil
+      no_h |> Rectangle.area() #-> (ArithmeticError) bad argument in arithmetic expression: 1 * nil
+      no_w |> Rectangle.area() #-> (ArithmeticError) bad argument in arithmetic expression: nil * 2
+      wide |> Rectangle.area() #-> 50
+      tall |> Rectangle.area() #-> 100
+      even |> Rectangle.area() #-> 100
+
+      rect |> Rectangle.perimeter() #-> (ArithmeticError) bad argument in arithmetic expression: nil + nil
+      no_h |> Rectangle.perimeter() #-> (ArithmeticError) bad argument in arithmetic expression: 1 + nil
+      no_w |> Rectangle.perimeter() #-> (ArithmeticError) bad argument in arithmetic expression: nil + 2
+      wide |> Rectangle.perimeter() #-> 30
+      tall |> Rectangle.perimeter() #-> 58
+      even |> Rectangle.perimeter() #-> 40
+
+      rect |> Rectangle.square?() #-> true
+      no_h |> Rectangle.square?() #-> false
+      no_w |> Rectangle.square?() #-> false
+      wide |> Rectangle.square?() #-> false
+      tall |> Rectangle.square?() #-> false
+      even |> Rectangle.square?() #-> true
+
+  """
   defmacro defrecord(alias, fields, do_block \\ []) do
     quote do
       defmodule unquote(alias |> concat_alias([:StructyRecord])) do
@@ -57,15 +175,15 @@ defmodule StructyRecord do
         [__MODULE__ | contents] |> :erlang.list_to_tuple()
       end
 
-      defmacro record(args \\ []) do
+      defmacro record(record_or_contents \\ []) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(args))
+          unquote(__MODULE__).StructyRecord.record(unquote(record_or_contents))
         end
       end
 
-      defmacro record(record, args) do
+      defmacro record(record, updates) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(args))
+          unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(updates))
         end
       end
 
