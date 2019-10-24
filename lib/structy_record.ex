@@ -3,7 +3,7 @@ defmodule StructyRecord do
   Documentation for StructyRecord.
   """
 
-  @reserved_field_names [:record, :record?, :keypos]
+  @reserved_field_names [:record, :record!, :record?, :keypos]
 
   defmacro defrecord(alias, fields, do_block \\ []) do
     quote do
@@ -41,6 +41,22 @@ defmodule StructyRecord do
 
   defp record_macros() do
     quote do
+      def record!(contents) do
+        record!(__MODULE__.StructyRecord.record(), contents)
+      end
+
+      def record!(record, updates) do
+        template = record |> __MODULE__.StructyRecord.record()
+
+        contents =
+          template
+          |> Enum.map(fn {field, default_value} ->
+            Access.get(updates, field, default_value)
+          end)
+
+        [__MODULE__ | contents] |> :erlang.list_to_tuple()
+      end
+
       defmacro record(args \\ []) do
         quote do
           unquote(__MODULE__).StructyRecord.record(unquote(args))
