@@ -8,7 +8,7 @@ defmodule StructyRecordTest do
     end
   end
 
-  import StructyRecordTest.DefrecordTestHelper
+  import TestHelper, only: :macros
 
   describe_defrecord "no fields in record", [] do
     describe "record/0" do

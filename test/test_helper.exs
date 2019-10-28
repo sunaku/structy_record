@@ -1,6 +1,6 @@
 ExUnit.start()
 
-defmodule StructyRecordTest.DefrecordTestHelper do
+defmodule TestHelper do
   defmacro describe_defrecord(description, fields, do_block) do
     quote do
       defmodule unquote(Module.concat([__MODULE__, description])) do
