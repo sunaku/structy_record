@@ -5,19 +5,25 @@ defmodule TestHelper do
     quote do
       defmodule unquote(Module.concat([__MODULE__, description])) do
         defmodule Setup do
-          require StructyRecord
+          define_the_record = fn ->
+            require StructyRecord
 
-          StructyRecord.defrecord Record, unquote(fields) do
-            defmacro macro(arg) do
-              quote do
-                unquote(arg)
+            StructyRecord.defrecord Record, unquote(fields) do
+              defmacro macro(arg) do
+                quote do
+                  unquote(arg)
+                end
               end
+
+              def function(arg), do: arg
+
+              def function_using_macros(r = record()), do: r
             end
-
-            def function(arg), do: arg
-
-            def function_using_macros(r = record()), do: r
           end
+
+          import ExUnit.CaptureIO
+          @warnings capture_io(:stderr, define_the_record)
+          def warnings, do: @warnings
         end
 
         defmodule Test do
