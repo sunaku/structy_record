@@ -36,7 +36,6 @@ defmodule StructyRecord.MixProject do
   defp package do
     [
       licenses: ["ISC"],
-      files: ["LICENSE", "README.md", "lib", "mix.exs"],
       links: %{"GitHub" => @github}
     ]
   end
