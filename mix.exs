@@ -18,10 +18,6 @@ defmodule StructyRecord.MixProject do
     ]
   end
 
-  def application do
-    []
-  end
-
   defp deps do
     [
       {:ex_doc, "~> 0.21", only: :dev, runtime: false}

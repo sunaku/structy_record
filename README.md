@@ -19,7 +19,7 @@ by adding `structy_record` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:structy_record, "~> 0.1.0"}
+    {:structy_record, "~> 0.1.0", runtime: false}
   ]
 end
 ```
