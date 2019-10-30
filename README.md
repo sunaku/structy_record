@@ -11,10 +11,12 @@ To get started, see the documentation for `StructyRecord.defrecord/3`:
 
     iex> h StructyRecord.defrecord
 
+The documentation is published at <https://hexdocs.pm/structy_record>.
+
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `structy_record` to your list of dependencies in `mix.exs`:
+The package is [available in Hex](https://hex.pm/packages/structy_record) and can
+be installed by adding `structy_record` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -23,10 +25,6 @@ def deps do
   ]
 end
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/structy_record](https://hexdocs.pm/structy_record).
 
 ## License
 
