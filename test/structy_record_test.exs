@@ -43,6 +43,19 @@ defmodule StructyRecordTest do
       end
     end
 
+    describe "to_list/1" do
+      test "to convert a record into a Keyword list" do
+        record = Setup.Record.record()
+        assert Setup.Record.to_list(record) == []
+      end
+
+      test "doesn't auto-create a record from Keyword list" do
+        assert_raise ArgumentError, "expected a #{inspect(Setup.Record)} record, got []", fn ->
+          Setup.Record.to_list([])
+        end
+      end
+    end
+
     describe "inspect/2" do
       test "to pretty-print a record with its field names and values" do
         record = Setup.Record.record()
@@ -166,6 +179,13 @@ defmodule StructyRecordTest do
         assert record |> Setup.Record.one() == 1
       end
     end
+
+    describe "to_list/1" do
+      test "to convert a record into a Keyword list" do
+        record = Setup.Record.record()
+        assert Setup.Record.to_list(record) == [one: 1]
+      end
+    end
   end
 
   describe_defrecord "field name conflicts with macro", [
@@ -173,7 +193,8 @@ defmodule StructyRecordTest do
     :record!,
     :record?,
     :keypos,
-    :inspect
+    :inspect,
+    :to_list
   ] do
     describe "${field}/1" do
       test "to access a specific field in a given record" do
@@ -198,6 +219,7 @@ defmodule StructyRecordTest do
       assert warnings =~ ~r/warning: .+Field name :record\? conflicts with .+/
       assert warnings =~ ~r/warning: .+Field name :keypos conflicts with .+/
       assert warnings =~ ~r/warning: .+Field name :inspect conflicts with .+/
+      assert warnings =~ ~r/warning: .+Field name :to_list conflicts with .+/
     end
   end
 end

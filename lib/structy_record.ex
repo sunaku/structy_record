@@ -10,7 +10,7 @@ defmodule StructyRecord do
 
   """
 
-  @reserved_field_names [:record, :record!, :record?, :keypos, :inspect]
+  @reserved_field_names [:record, :record!, :record?, :keypos, :inspect, :to_list]
 
   @doc """
   Defines a module named `alias` that is also a `Record` composed of `fields`.
@@ -46,6 +46,7 @@ defmodule StructyRecord do
   - `${field}/1` to get the value of a specific field in a given record
   - `${field}/2` to set the value of a specific field in a given record
   - `keypos/1` to get the 1-based index of the given field in a record
+  - `to_list/1` to convert the given record into a `Keyword` list
 
   Functions:
   - `record!/1` to create a new record _at runtime_ with the given fields and values
@@ -200,6 +201,19 @@ defmodule StructyRecord do
       defmacro record?(record) do
         quote do
           match?(unquote(__MODULE__).StructyRecord.record(), unquote(record))
+        end
+      end
+
+      defmacro to_list(record) do
+        quote do
+          if unquote(__MODULE__).record?(unquote(record)) do
+            unquote(__MODULE__).StructyRecord.record(unquote(record))
+          else
+            raise ArgumentError,
+                  "expected a #{inspect(unquote(__MODULE__))} record, got #{
+                    inspect(unquote(record))
+                  }"
+          end
         end
       end
 
