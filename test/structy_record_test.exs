@@ -42,6 +42,15 @@ defmodule StructyRecordTest do
         end
       end
     end
+
+    describe "inspect/2" do
+      test "to pretty-print a record with its field names and values" do
+        record = Setup.Record.record()
+        module = inspect(Setup.Record)
+        assert Setup.Record.inspect(record) == "#{module}.record()"
+        assert Setup.Record.inspect(record, label: "foo") == "foo: #{module}.record()"
+      end
+    end
   end
 
   describe_defrecord "one field in record", [:one] do
@@ -126,6 +135,13 @@ defmodule StructyRecordTest do
                  1 + Setup.Record.StructyRecord.record(:one)
       end
     end
+
+    describe "inspect/2" do
+      test "to pretty-print a record with its field names and values" do
+        record = Setup.Record.record(one: 1)
+        assert Setup.Record.inspect(record) == "#{inspect(Setup.Record)}.record(one: 1)"
+      end
+    end
   end
 
   describe_defrecord "field with default value", one: 1 do
@@ -152,7 +168,13 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe_defrecord "field name conflicts with macro", [:record, :record!, :record?, :keypos] do
+  describe_defrecord "field name conflicts with macro", [
+    :record,
+    :record!,
+    :record?,
+    :keypos,
+    :inspect
+  ] do
     describe "${field}/1" do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
@@ -175,6 +197,7 @@ defmodule StructyRecordTest do
       assert warnings =~ ~r/warning: .+Field name :record! conflicts with .+/
       assert warnings =~ ~r/warning: .+Field name :record\? conflicts with .+/
       assert warnings =~ ~r/warning: .+Field name :keypos conflicts with .+/
+      assert warnings =~ ~r/warning: .+Field name :inspect conflicts with .+/
     end
   end
 end

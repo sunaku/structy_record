@@ -10,7 +10,7 @@ defmodule StructyRecord do
 
   """
 
-  @reserved_field_names [:record, :record!, :record?, :keypos]
+  @reserved_field_names [:record, :record!, :record?, :keypos, :inspect]
 
   @doc """
   Defines a module named `alias` that is also a `Record` composed of `fields`.
@@ -50,6 +50,7 @@ defmodule StructyRecord do
   Functions:
   - `record!/1` to create a new record _at runtime_ with the given fields and values
   - `record!/2` to update an existing record with the given fields and values
+  - `inspect/2` to inspect the contents of a record using `Kernel.inspect/2`
 
   ## Examples
 
@@ -82,8 +83,17 @@ defmodule StructyRecord do
       no_h = Rectangle.record(width: 1)              #-> {Rectangle, 1, nil}
       no_w = Rectangle.record(height: 2)             #-> {Rectangle, nil, 2}
       wide = Rectangle.record(width: 10, height: 5)  #-> {Rectangle, 10, 5}
-      tall = Rectangle.record(width:  4, height: 25) #-> {Rectangle, 4, 25}
+      tall = Rectangle.record(width: 4, height: 25)  #-> {Rectangle, 4, 25}
       even = Rectangle.record(width: 10, height: 10) #-> {Rectangle, 10, 10}
+
+  Inspect the contents of those instances:
+
+      rect |> Rectangle.inspect() #-> "Rectangle.record(width: nil, height: nil)"
+      no_h |> Rectangle.inspect() #-> "Rectangle.record(width: 1, height: nil)"
+      no_w |> Rectangle.inspect() #-> "Rectangle.record(width: nil, height: 2)"
+      wide |> Rectangle.inspect() #-> "Rectangle.record(width: 10, height: 5)"
+      tall |> Rectangle.inspect() #-> "Rectangle.record(width: 4, height: 25)"
+      even |> Rectangle.inspect() #-> "Rectangle.record(width: 10, height: 10)"
 
   Get values of fields in those instances:
 
@@ -191,6 +201,29 @@ defmodule StructyRecord do
         quote do
           match?(unquote(__MODULE__).StructyRecord.record(), unquote(record))
         end
+      end
+
+      def inspect(record, options \\ []) do
+        options_without_label = Keyword.delete(options, :label)
+        inspect(record, options_without_label, options[:label])
+      end
+
+      defp inspect(record, options_without_label, _label = nil) do
+        inspect =
+          record
+          |> __MODULE__.StructyRecord.record()
+          |> Kernel.inspect(options_without_label)
+
+        # omit enclosing [] square brackets from inspected Keyword list
+        length_of_contents = byte_size(inspect) - 2
+        <<?[, contents::binary-size(length_of_contents), ?]>> = inspect
+
+        "#{inspect(__MODULE__)}.record(#{contents})"
+      end
+
+      defp inspect(record, options_without_label, label) do
+        inspect = inspect(record, options_without_label, _label = nil)
+        "#{label}: #{inspect}"
       end
 
       require Record
