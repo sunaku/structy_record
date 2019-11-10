@@ -214,12 +214,14 @@ defmodule StructyRecordTest do
 
     test "warns about field names that conflict with reserved names" do
       warnings = Setup.warnings()
-      assert warnings =~ ~r/warning: .+Field name :record conflicts with .+/
-      assert warnings =~ ~r/warning: .+Field name :record! conflicts with .+/
-      assert warnings =~ ~r/warning: .+Field name :record\? conflicts with .+/
-      assert warnings =~ ~r/warning: .+Field name :keypos conflicts with .+/
-      assert warnings =~ ~r/warning: .+Field name :inspect conflicts with .+/
-      assert warnings =~ ~r/warning: .+Field name :to_list conflicts with .+/
+
+      record = Setup.Record.record()
+      fields = record |> Setup.Record.to_list() |> Keyword.keys()
+
+      for field <- fields do
+        assert warnings =~ ~r/warning: .+Field name #{inspect(field)} conflicts with .+/,
+               "should warn about #{inspect(field)} field name conflict"
+      end
     end
   end
 end
