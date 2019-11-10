@@ -40,14 +40,14 @@ defmodule StructyRecord do
   - `record/0` to create a new record with default values for all fields
   - `record/1` to create a new record with the given fields and values
   - `record/1` to get the zero-based index of the given field in a record
-  - `record/1` to convert the given record into a `Keyword` list
+  - `record/1` to convert a record into a list of its fields and values
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
   - `${field}/1` to get the value of a specific field in a given record
   - `${field}/2` to set the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
-  - `to_list/1` to convert the given record into a `Keyword` list
+  - `to_list/1` to convert a record into a list of its fields and values
 
   Functions:
   - `record!/1` to create a new record _at runtime_ with the given fields and values
@@ -170,22 +170,38 @@ defmodule StructyRecord do
 
   defp record_primitives do
     quote do
-      defmacro record(record_or_contents \\ []) do
+      @doc """
+      Either creates a new record with the given fields and values,
+      or returns the zero-based index of the given field in a record,
+      or converts the given record into a list of its fields and values.
+      Defaults to creating a new record with fields set to default values.
+      """
+      defmacro record(contents_or_field_or_record \\ []) do
         quote do
-          StructyRecord_Definition.record(unquote(record_or_contents))
+          StructyRecord_Definition.record(unquote(contents_or_field_or_record))
         end
       end
 
-      defmacro record(record, updates) do
+      @doc """
+      Either fetches the value of a given field in a given record,
+      or updates the given record with the given fields and values.
+      """
+      defmacro record(record, field_or_updates) do
         quote do
-          StructyRecord_Definition.record(unquote(record), unquote(updates))
+          StructyRecord_Definition.record(unquote(record), unquote(field_or_updates))
         end
       end
 
+      @doc """
+      Checks if the given argument _loosely_ matches this record's shape.
+      """
       defguard is_record(record)
                when record
                     |> StructyRecord_Record.is_record(StructyRecord_Interface)
 
+      @doc """
+      Checks if the given argument _strictly_ matches this record's shape.
+      """
       defmacro record?(record) do
         quote do
           StructyRecord_Interface.is_record(unquote(record)) and
@@ -193,10 +209,16 @@ defmodule StructyRecord do
         end
       end
 
+      @doc """
+      Creates a new record _at runtime_ with the given fields and values.
+      """
       def record!(contents) do
         record!(StructyRecord_Definition.record(), contents)
       end
 
+      @doc """
+      Updates the given record _at runtime_ with the given fields and values.
+      """
       def record!(record, updates) do
         template = record |> StructyRecord_Definition.record()
 
@@ -213,18 +235,27 @@ defmodule StructyRecord do
 
   defp elixiry_interface do
     quote do
+      @doc """
+      Returns the zero-based index of the given field in this kind of record.
+      """
       defmacro index(args) do
         quote do
           StructyRecord_Definition.record(unquote(args))
         end
       end
 
+      @doc """
+      Returns the 1-based position of the given field in this kind of record.
+      """
       defmacro keypos(args) do
         quote do
           1 + StructyRecord_Interface.index(unquote(args))
         end
       end
 
+      @doc """
+      Converts the given record into a `Keyword` list of its fields and values.
+      """
       defmacro to_list(record) do
         quote do
           if StructyRecord_Interface.record?(unquote(record)) do
@@ -238,6 +269,9 @@ defmodule StructyRecord do
         end
       end
 
+      @doc """
+      Inspects the contents of the given record using `Kernel.inspect/2`.
+      """
       def inspect(record, options \\ []) do
         options_without_label = Keyword.delete(options, :label)
         inspect(record, options_without_label, options[:label])
@@ -306,6 +340,9 @@ defmodule StructyRecord do
 
   defp getter_macro(field) do
     quote do
+      @doc """
+      Gets the value of #{unquote(inspect(field))} field in the given record.
+      """
       defmacro unquote(field)(record) do
         quote do
           StructyRecord_Definition.record(unquote(record), :field)
@@ -321,6 +358,9 @@ defmodule StructyRecord do
 
   defp setter_macro(field) do
     quote do
+      @doc """
+      Sets the value of #{unquote(inspect(field))} field in the given record.
+      """
       defmacro unquote(field)(record, value) do
         quote do
           StructyRecord_Definition.record(unquote(record), unquote(value))
