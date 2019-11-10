@@ -136,7 +136,7 @@ defmodule StructyRecord do
 
   """
   defmacro defrecord(alias, fields, do_block \\ []) do
-    definition = alias |> concat_alias([:StructyRecord])
+    definition = alias |> append_alias(:StructyRecord)
 
     quote do
       require Record, as: StructyRecord_Record
@@ -149,32 +149,50 @@ defmodule StructyRecord do
         require unquote(definition), as: StructyRecord_Definition
         alias __MODULE__, as: StructyRecord_Interface
 
-        unquote(using_macro())
-        unquote(record_macros())
-        unquote(keypos_macros())
-        unquote(access_macros(fields))
+        defmacro __using__(_options) do
+          quote do
+            require StructyRecord_Definition
+            require StructyRecord_Interface
+          end
+        end
+
+        unquote(record_primitives())
+        unquote(elixiry_interface())
+        unquote(field_accessors(fields))
         unquote(do_block)
       end
     end
   end
 
-  defp concat_alias({tag = :__aliases__, context, namespace}, appendix) do
-    {tag, context, namespace ++ appendix}
+  defp append_alias({tag = :__aliases__, context, namespace}, addendum) do
+    {tag, context, namespace ++ [addendum]}
   end
 
-  defp using_macro do
+  defp record_primitives do
     quote do
-      defmacro __using__(_opts) do
+      defmacro record(record_or_contents \\ []) do
         quote do
-          require StructyRecord_Definition
-          require StructyRecord_Interface
+          StructyRecord_Definition.record(unquote(record_or_contents))
         end
       end
-    end
-  end
 
-  defp record_macros() do
-    quote do
+      defmacro record(record, updates) do
+        quote do
+          StructyRecord_Definition.record(unquote(record), unquote(updates))
+        end
+      end
+
+      defguard is_record(record)
+               when record
+                    |> StructyRecord_Record.is_record(StructyRecord_Interface)
+
+      defmacro record?(record) do
+        quote do
+          StructyRecord_Interface.is_record(unquote(record)) and
+            match?(StructyRecord_Definition.record(), unquote(record))
+        end
+      end
+
       def record!(contents) do
         record!(StructyRecord_Definition.record(), contents)
       end
@@ -190,22 +208,20 @@ defmodule StructyRecord do
 
         [StructyRecord_Interface | contents] |> :erlang.list_to_tuple()
       end
+    end
+  end
 
-      defmacro record(record_or_contents \\ []) do
+  defp elixiry_interface do
+    quote do
+      defmacro index(args) do
         quote do
-          StructyRecord_Definition.record(unquote(record_or_contents))
+          StructyRecord_Definition.record(unquote(args))
         end
       end
 
-      defmacro record(record, updates) do
+      defmacro keypos(args) do
         quote do
-          StructyRecord_Definition.record(unquote(record), unquote(updates))
-        end
-      end
-
-      defmacro record?(record) do
-        quote do
-          match?(StructyRecord_Definition.record(), unquote(record))
+          1 + StructyRecord_Interface.index(unquote(args))
         end
       end
 
@@ -244,30 +260,10 @@ defmodule StructyRecord do
         inspect = inspect(record, options_without_label, _label = nil)
         "#{label}: #{inspect}"
       end
-
-      defguard is_record(record)
-               when record
-                    |> StructyRecord_Record.is_record(StructyRecord_Interface)
     end
   end
 
-  defp keypos_macros() do
-    quote do
-      defmacro index(args) do
-        quote do
-          StructyRecord_Definition.record(unquote(args))
-        end
-      end
-
-      defmacro keypos(args) do
-        quote do
-          1 + StructyRecord_Interface.index(unquote(args))
-        end
-      end
-    end
-  end
-
-  defp access_macros(fields) do
+  defp field_accessors(fields) do
     {reserved_fields, allowed_fields} = reserved_vs_allowed_fields(fields)
     warnings = reserved_fields |> Enum.map(&reserved_field_warning/1)
     getters = allowed_fields |> Enum.map(&getter_macro/1)
