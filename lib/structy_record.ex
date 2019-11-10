@@ -10,7 +10,7 @@ defmodule StructyRecord do
 
   """
 
-  @reserved_field_names [:record, :record!, :record?, :keypos, :inspect, :to_list]
+  @reserved_field_names [:record, :record!, :record?, :index, :keypos, :inspect, :to_list]
 
   @doc """
   Defines a module named `alias` that is also a `Record` composed of `fields`.
@@ -45,6 +45,7 @@ defmodule StructyRecord do
   - `record/2` to update an existing record with the given fields and values
   - `${field}/1` to get the value of a specific field in a given record
   - `${field}/2` to set the value of a specific field in a given record
+  - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
   - `to_list/1` to convert the given record into a `Keyword` list
 
@@ -247,9 +248,15 @@ defmodule StructyRecord do
 
   defp keypos_macros() do
     quote do
+      defmacro index(args) do
+        quote do
+          unquote(__MODULE__).StructyRecord.record(unquote(args))
+        end
+      end
+
       defmacro keypos(args) do
         quote do
-          1 + unquote(__MODULE__).StructyRecord.record(unquote(args))
+          1 + unquote(__MODULE__).index(unquote(args))
         end
       end
     end

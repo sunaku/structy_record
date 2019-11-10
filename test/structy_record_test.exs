@@ -142,6 +142,12 @@ defmodule StructyRecordTest do
       end
     end
 
+    describe "index/1" do
+      test "to get the zero-based index of the given field in a record" do
+        assert Setup.Record.index(:one) == Setup.Record.StructyRecord.record(:one)
+      end
+    end
+
     describe "keypos/1" do
       test "to get the 1-based index of the given field in a record" do
         assert Setup.Record.keypos(:one) ==
@@ -192,6 +198,7 @@ defmodule StructyRecordTest do
     :record,
     :record!,
     :record?,
+    :index,
     :keypos,
     :inspect,
     :to_list
