@@ -136,15 +136,19 @@ defmodule StructyRecord do
 
   """
   defmacro defrecord(alias, fields, do_block \\ []) do
+    definition = alias |> concat_alias([:StructyRecord])
+
     quote do
-      defmodule unquote(alias |> concat_alias([:StructyRecord])) do
-        alias unquote(alias), as: Tag
-        require Record
-        Record.defrecord(:record, Tag, unquote(fields))
+      require Record, as: StructyRecord_Record
+
+      defmodule unquote(definition) do
+        StructyRecord_Record.defrecord(:record, unquote(alias), unquote(fields))
       end
 
       defmodule unquote(alias) do
-        require __MODULE__.StructyRecord
+        require unquote(definition), as: StructyRecord_Definition
+        alias __MODULE__, as: StructyRecord_Interface
+
         unquote(using_macro())
         unquote(record_macros())
         unquote(keypos_macros())
@@ -162,8 +166,8 @@ defmodule StructyRecord do
     quote do
       defmacro __using__(_opts) do
         quote do
-          require unquote(__MODULE__).StructyRecord
-          require unquote(__MODULE__)
+          require StructyRecord_Definition
+          require StructyRecord_Interface
         end
       end
     end
@@ -172,11 +176,11 @@ defmodule StructyRecord do
   defp record_macros() do
     quote do
       def record!(contents) do
-        record!(__MODULE__.StructyRecord.record(), contents)
+        record!(StructyRecord_Definition.record(), contents)
       end
 
       def record!(record, updates) do
-        template = record |> __MODULE__.StructyRecord.record()
+        template = record |> StructyRecord_Definition.record()
 
         contents =
           template
@@ -184,34 +188,34 @@ defmodule StructyRecord do
             Access.get(updates, field, default_value)
           end)
 
-        [__MODULE__ | contents] |> :erlang.list_to_tuple()
+        [StructyRecord_Interface | contents] |> :erlang.list_to_tuple()
       end
 
       defmacro record(record_or_contents \\ []) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(record_or_contents))
+          StructyRecord_Definition.record(unquote(record_or_contents))
         end
       end
 
       defmacro record(record, updates) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(updates))
+          StructyRecord_Definition.record(unquote(record), unquote(updates))
         end
       end
 
       defmacro record?(record) do
         quote do
-          match?(unquote(__MODULE__).StructyRecord.record(), unquote(record))
+          match?(StructyRecord_Definition.record(), unquote(record))
         end
       end
 
       defmacro to_list(record) do
         quote do
-          if unquote(__MODULE__).record?(unquote(record)) do
-            unquote(__MODULE__).StructyRecord.record(unquote(record))
+          if StructyRecord_Interface.record?(unquote(record)) do
+            StructyRecord_Definition.record(unquote(record))
           else
             raise ArgumentError,
-                  "expected a #{inspect(unquote(__MODULE__))} record, got #{
+                  "expected a #{inspect(StructyRecord_Interface)} record, got #{
                     inspect(unquote(record))
                   }"
           end
@@ -226,14 +230,14 @@ defmodule StructyRecord do
       defp inspect(record, options_without_label, _label = nil) do
         inspect =
           record
-          |> __MODULE__.StructyRecord.record()
+          |> StructyRecord_Definition.record()
           |> Kernel.inspect(options_without_label)
 
         # omit enclosing [] square brackets from inspected Keyword list
         length_of_contents = byte_size(inspect) - 2
         <<?[, contents::binary-size(length_of_contents), ?]>> = inspect
 
-        "#{inspect(__MODULE__)}.record(#{contents})"
+        "#{inspect(StructyRecord_Interface)}.record(#{contents})"
       end
 
       defp inspect(record, options_without_label, label) do
@@ -241,8 +245,9 @@ defmodule StructyRecord do
         "#{label}: #{inspect}"
       end
 
-      require Record
-      defguard is_record(record) when Record.is_record(record, __MODULE__)
+      defguard is_record(record)
+               when record
+                    |> StructyRecord_Record.is_record(StructyRecord_Interface)
     end
   end
 
@@ -250,13 +255,13 @@ defmodule StructyRecord do
     quote do
       defmacro index(args) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(args))
+          StructyRecord_Definition.record(unquote(args))
         end
       end
 
       defmacro keypos(args) do
         quote do
-          1 + unquote(__MODULE__).index(unquote(args))
+          1 + StructyRecord_Interface.index(unquote(args))
         end
       end
     end
@@ -297,7 +302,7 @@ defmodule StructyRecord do
     quote do
       IO.warn(
         "(StructyRecord) Field name #{inspect(unquote(field))} conflicts with existing #{
-          inspect(__MODULE__)
+          inspect(StructyRecord_Interface)
         }.#{unquote(field)}() macro, so field accessor macros will not be defined for this name."
       )
     end
@@ -307,7 +312,7 @@ defmodule StructyRecord do
     quote do
       defmacro unquote(field)(record) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(record), :field)
+          StructyRecord_Definition.record(unquote(record), :field)
         end
         |> case do
           {call, meta, _args = [record, :field]} ->
@@ -322,7 +327,7 @@ defmodule StructyRecord do
     quote do
       defmacro unquote(field)(record, value) do
         quote do
-          unquote(__MODULE__).StructyRecord.record(unquote(record), unquote(value))
+          StructyRecord_Definition.record(unquote(record), unquote(value))
         end
         |> case do
           {call, meta, _args = [record, value]} ->
