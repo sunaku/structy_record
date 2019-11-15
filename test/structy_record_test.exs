@@ -49,7 +49,7 @@ defmodule StructyRecordTest do
         assert Setup.Record.to_list(record) == []
       end
 
-      test "doesn't auto-create a record from Keyword list" do
+      test "disambiguate record/2 which creates a record from Keyword list" do
         assert_raise ArgumentError, "expected a #{inspect(Setup.Record)} record, got []", fn ->
           Setup.Record.to_list([])
         end
@@ -134,11 +134,27 @@ defmodule StructyRecordTest do
         assert record |> Setup.Record.get(:one) == nil
       end
 
-      test "doesn't auto-create a record from Keyword list" do
+      test "disambiguate set/2 which delegates to record/2 with Keyword list" do
         record = Setup.Record.record()
 
         assert_raise ArgumentError, "expected an atom, got []", fn ->
           record |> Setup.Record.get([])
+        end
+      end
+    end
+
+    describe "set/2" do
+      test "to update an existing record with the given fields and values" do
+        record = Setup.Record.record()
+        updated_record = record |> Setup.Record.set(one: 1)
+        assert updated_record |> Setup.Record.get(:one) == 1
+      end
+
+      test "disambiguate get/2 which delegates to record/2 with field atom" do
+        record = Setup.Record.record()
+
+        assert_raise ArgumentError, "expected a Keyword list, got :one", fn ->
+          record |> Setup.Record.set(:one)
         end
       end
     end
@@ -214,6 +230,7 @@ defmodule StructyRecordTest do
     :record!,
     :record?,
     :get,
+    :set,
     :index,
     :keypos,
     :inspect,

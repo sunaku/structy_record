@@ -10,7 +10,17 @@ defmodule StructyRecord do
 
   """
 
-  @reserved_field_names [:record, :record!, :record?, :get, :index, :keypos, :inspect, :to_list]
+  @reserved_field_names [
+    :record,
+    :record!,
+    :record?,
+    :get,
+    :set,
+    :index,
+    :keypos,
+    :inspect,
+    :to_list
+  ]
 
   @doc """
   Defines a module named `alias` that is also a `Record` composed of `fields`.
@@ -44,6 +54,7 @@ defmodule StructyRecord do
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
   - `get/2` to get the value of a given field in a given record
+  - `set/2` to update an existing record with the given fields and values
   - `${field}/1` to get the value of a specific field in a given record
   - `${field}/2` to set the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
@@ -280,6 +291,20 @@ defmodule StructyRecord do
           else
             raise ArgumentError,
                   "expected an atom, got #{inspect(unquote(field))}"
+          end
+        end
+      end
+
+      @doc """
+      Updates the given record with the given fields and values.
+      """
+      defmacro set(record, updates) do
+        quote do
+          if Keyword.keyword?(unquote(updates)) do
+            StructyRecord_Definition.record(unquote(record), unquote(updates))
+          else
+            raise ArgumentError,
+                  "expected a Keyword list, got #{inspect(unquote(updates))}"
           end
         end
       end
