@@ -18,6 +18,12 @@ defmodule StructyRecordTest do
       end
     end
 
+    describe "create/0" do
+      test "to create a new record with default values for all fields" do
+        assert Setup.Record.create() == Setup.Record.record()
+      end
+    end
+
     describe "record?/1" do
       test "checks if argument strictly matches the shape of this record" do
         assert Setup.Record.record() |> Setup.Record.record?()
@@ -125,6 +131,27 @@ defmodule StructyRecordTest do
         record = Setup.Record.record()
         updated_record = record |> Setup.Record.record(one: 1)
         assert updated_record |> Setup.Record.record(:one) == 1
+      end
+    end
+
+    describe "create/1" do
+      test "to create a new record with the given fields and values" do
+        assert Setup.Record.create(one: 1) ==
+                 Setup.Record.StructyRecord.record(one: 1)
+      end
+
+      test "disambiguate record/1 which also accepts an atom" do
+        assert_raise ArgumentError, "expected a Keyword list, got :one", fn ->
+          Setup.Record.create(:one)
+        end
+      end
+
+      test "disambiguate record/1 which also accepts a record" do
+        record = Setup.Record.StructyRecord.record()
+
+        assert_raise ArgumentError, "expected a Keyword list, got #{inspect(record)}", fn ->
+          Setup.Record.create(record)
+        end
       end
     end
 
