@@ -128,33 +128,33 @@ defmodule StructyRecordTest do
       end
     end
 
-    describe "get/2" do
+    describe "fetch/2" do
       test "to access a given field in a given record" do
         record = Setup.Record.record()
-        assert record |> Setup.Record.get(:one) == nil
+        assert record |> Setup.Record.fetch(:one) == nil
       end
 
-      test "disambiguate set/2 which delegates to record/2 with Keyword list" do
+      test "disambiguate update/2 which delegates to record/2 with Keyword list" do
         record = Setup.Record.record()
 
         assert_raise ArgumentError, "expected an atom, got []", fn ->
-          record |> Setup.Record.get([])
+          record |> Setup.Record.fetch([])
         end
       end
     end
 
-    describe "set/2" do
+    describe "update/2" do
       test "to update an existing record with the given fields and values" do
         record = Setup.Record.record()
-        updated_record = record |> Setup.Record.set(one: 1)
-        assert updated_record |> Setup.Record.get(:one) == 1
+        updated_record = record |> Setup.Record.update(one: 1)
+        assert updated_record |> Setup.Record.fetch(:one) == 1
       end
 
-      test "disambiguate get/2 which delegates to record/2 with field atom" do
+      test "disambiguate fetch/2 which delegates to record/2 with field atom" do
         record = Setup.Record.record()
 
         assert_raise ArgumentError, "expected a Keyword list, got :one", fn ->
-          record |> Setup.Record.set(:one)
+          record |> Setup.Record.update(:one)
         end
       end
     end
@@ -229,8 +229,8 @@ defmodule StructyRecordTest do
     :record,
     :record!,
     :record?,
-    :get,
-    :set,
+    :fetch,
+    :update,
     :index,
     :keypos,
     :inspect,

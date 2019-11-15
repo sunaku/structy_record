@@ -14,8 +14,8 @@ defmodule StructyRecord do
     :record,
     :record!,
     :record?,
-    :get,
-    :set,
+    :fetch,
+    :update,
     :index,
     :keypos,
     :inspect,
@@ -53,8 +53,8 @@ defmodule StructyRecord do
   - `record/1` to convert a record into a list of its fields and values
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
-  - `get/2` to get the value of a given field in a given record
-  - `set/2` to update an existing record with the given fields and values
+  - `fetch/2` to get the value of a given field in a given record
+  - `update/2` to update an existing record with the given fields and values
   - `${field}/1` to get the value of a specific field in a given record
   - `${field}/2` to set the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
@@ -282,9 +282,9 @@ defmodule StructyRecord do
       end
 
       @doc """
-      Returns the value of the given field in the given record.
+      Fetches the value of the given field in the given record.
       """
-      defmacro get(record, field) do
+      defmacro fetch(record, field) do
         quote do
           if is_atom(unquote(field)) do
             StructyRecord_Definition.record(unquote(record), unquote(field))
@@ -298,7 +298,7 @@ defmodule StructyRecord do
       @doc """
       Updates the given record with the given fields and values.
       """
-      defmacro set(record, updates) do
+      defmacro update(record, updates) do
         quote do
           if Keyword.keyword?(unquote(updates)) do
             StructyRecord_Definition.record(unquote(record), unquote(updates))
