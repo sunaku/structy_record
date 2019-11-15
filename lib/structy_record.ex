@@ -19,7 +19,8 @@ defmodule StructyRecord do
     :index,
     :keypos,
     :inspect,
-    :to_list
+    :to_list,
+    :from_list
   ]
 
   @doc """
@@ -62,7 +63,7 @@ defmodule StructyRecord do
   - `to_list/1` to convert a record into a list of its fields and values
 
   Functions:
-  - `record!/1` to create a new record _at runtime_ with the given fields and values
+  - `from_list/1` to create a new record _at runtime_ with the given fields and values
   - `record!/2` to update an existing record with the given fields and values
   - `inspect/2` to inspect the contents of a record using `Kernel.inspect/2`
 
@@ -224,7 +225,7 @@ defmodule StructyRecord do
       @doc """
       Creates a new record _at runtime_ with the given fields and values.
       """
-      def record!(contents) do
+      def from_list(contents) do
         record!(StructyRecord_Definition.record(), contents)
       end
 

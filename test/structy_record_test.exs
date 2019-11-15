@@ -67,7 +67,7 @@ defmodule StructyRecordTest do
   end
 
   describe_defrecord "one field in record", [:one] do
-    describe "record!/1" do
+    describe "from_list/1" do
       test "to create a new record at runtime with the given fields and values" do
         test_create_runtime_record(Keyword.new())
         test_create_runtime_record(Map.new())
@@ -75,8 +75,8 @@ defmodule StructyRecordTest do
 
       defp test_create_runtime_record(container) do
         contents = [one: 1] |> Enum.into(container)
-        assert Setup.Record.record!(contents) == Setup.Record.record(one: 1)
-        assert Setup.Record.record!([]) == Setup.Record.record()
+        assert Setup.Record.from_list(contents) == Setup.Record.record(one: 1)
+        assert Setup.Record.from_list([]) == Setup.Record.record()
       end
     end
 
@@ -195,10 +195,10 @@ defmodule StructyRecordTest do
   end
 
   describe_defrecord "field with default value", one: 1 do
-    describe "record!/1" do
+    describe "from_list/1" do
       test "uses default field value when not specified in new contents" do
         contents = [two: 2]
-        runtime_record = Setup.Record.record!(contents)
+        runtime_record = Setup.Record.from_list(contents)
         assert runtime_record |> Setup.Record.one() == 1
       end
     end
@@ -234,7 +234,8 @@ defmodule StructyRecordTest do
     :index,
     :keypos,
     :inspect,
-    :to_list
+    :to_list,
+    :from_list
   ] do
     describe "${field}/1" do
       test "to access a specific field in a given record" do
