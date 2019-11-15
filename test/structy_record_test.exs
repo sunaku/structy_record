@@ -80,7 +80,7 @@ defmodule StructyRecordTest do
       end
     end
 
-    describe "record!/2" do
+    describe "update!/2" do
       test "to update an existing record with the given fields and values" do
         test_update_runtime_record(Keyword.new())
         test_update_runtime_record(Map.new())
@@ -91,7 +91,7 @@ defmodule StructyRecordTest do
         assert record |> Setup.Record.one() == nil
 
         updates = [one: 1] |> Enum.into(container)
-        runtime_record = record |> Setup.Record.record!(updates)
+        runtime_record = record |> Setup.Record.update!(updates)
         assert runtime_record |> Setup.Record.one() == 1
       end
     end
@@ -227,10 +227,10 @@ defmodule StructyRecordTest do
 
   describe_defrecord "field name conflicts with macro", [
     :record,
-    :record!,
     :record?,
     :fetch,
     :update,
+    :update!,
     :index,
     :keypos,
     :inspect,
@@ -241,7 +241,7 @@ defmodule StructyRecordTest do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
         assert Setup.Record.record(record) == Setup.Record.StructyRecord.record(record)
-        assert Setup.Record.record!(record, []) == Setup.Record.StructyRecord.record(record, [])
+        assert Setup.Record.update!(record, []) == Setup.Record.StructyRecord.record(record, [])
         assert Setup.Record.record?(record) == match?(Setup.Record.StructyRecord.record(), record)
       end
     end
