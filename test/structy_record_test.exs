@@ -128,6 +128,21 @@ defmodule StructyRecordTest do
       end
     end
 
+    describe "get/2" do
+      test "to access a given field in a given record" do
+        record = Setup.Record.record()
+        assert record |> Setup.Record.get(:one) == nil
+      end
+
+      test "doesn't auto-create a record from Keyword list" do
+        record = Setup.Record.record()
+
+        assert_raise ArgumentError, "expected an atom, got []", fn ->
+          record |> Setup.Record.get([])
+        end
+      end
+    end
+
     describe "${field}/1" do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
@@ -198,6 +213,7 @@ defmodule StructyRecordTest do
     :record,
     :record!,
     :record?,
+    :get,
     :index,
     :keypos,
     :inspect,

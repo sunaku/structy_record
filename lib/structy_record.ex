@@ -10,7 +10,7 @@ defmodule StructyRecord do
 
   """
 
-  @reserved_field_names [:record, :record!, :record?, :index, :keypos, :inspect, :to_list]
+  @reserved_field_names [:record, :record!, :record?, :get, :index, :keypos, :inspect, :to_list]
 
   @doc """
   Defines a module named `alias` that is also a `Record` composed of `fields`.
@@ -43,6 +43,7 @@ defmodule StructyRecord do
   - `record/1` to convert a record into a list of its fields and values
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
+  - `get/2` to get the value of a given field in a given record
   - `${field}/1` to get the value of a specific field in a given record
   - `${field}/2` to set the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
@@ -265,6 +266,20 @@ defmodule StructyRecord do
                   "expected a #{inspect(StructyRecord_Interface)} record, got #{
                     inspect(unquote(record))
                   }"
+          end
+        end
+      end
+
+      @doc """
+      Returns the value of the given field in the given record.
+      """
+      defmacro get(record, field) do
+        quote do
+          if is_atom(unquote(field)) do
+            StructyRecord_Definition.record(unquote(record), unquote(field))
+          else
+            raise ArgumentError,
+                  "expected an atom, got #{inspect(unquote(field))}"
           end
         end
       end
