@@ -88,11 +88,11 @@ defmodule StructyRecordTest do
 
       defp test_update_runtime_record(container) do
         record = Setup.Record.record()
-        assert record |> Setup.Record.one() == nil
+        assert record |> Setup.Record.get_one() == nil
 
         updates = [one: 1] |> Enum.into(container)
         runtime_record = record |> Setup.Record.update!(updates)
-        assert runtime_record |> Setup.Record.one() == 1
+        assert runtime_record |> Setup.Record.get_one() == 1
       end
     end
 
@@ -159,17 +159,17 @@ defmodule StructyRecordTest do
       end
     end
 
-    describe "${field}/1" do
+    describe "get_${field}/1" do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
-        assert record |> Setup.Record.one() == nil
+        assert record |> Setup.Record.get_one() == nil
       end
     end
 
-    describe "${field}/2" do
+    describe "set_${field}/2" do
       test "to assign a specific field in a given record" do
         record = Setup.Record.record()
-        assert record |> Setup.Record.one(1) == Setup.Record.record(one: 1)
+        assert record |> Setup.Record.set_one(1) == Setup.Record.record(one: 1)
       end
     end
 
@@ -199,7 +199,7 @@ defmodule StructyRecordTest do
       test "uses default field value when not specified in new contents" do
         contents = [two: 2]
         runtime_record = Setup.Record.from_list(contents)
-        assert runtime_record |> Setup.Record.one() == 1
+        assert runtime_record |> Setup.Record.get_one() == 1
       end
     end
 
@@ -210,10 +210,10 @@ defmodule StructyRecordTest do
       end
     end
 
-    describe "${field}/1" do
+    describe "get_${field}/1" do
       test "to access a specific field in a given record" do
         record = Setup.Record.record()
-        assert record |> Setup.Record.one() == 1
+        assert record |> Setup.Record.get_one() == 1
       end
     end
 
@@ -221,47 +221,6 @@ defmodule StructyRecordTest do
       test "to convert a record into a Keyword list" do
         record = Setup.Record.record()
         assert Setup.Record.to_list(record) == [one: 1]
-      end
-    end
-  end
-
-  describe_defrecord "field name conflicts with macro", [
-    :record,
-    :record?,
-    :fetch,
-    :update,
-    :update!,
-    :index,
-    :keypos,
-    :inspect,
-    :to_list,
-    :from_list
-  ] do
-    describe "${field}/1" do
-      test "to access a specific field in a given record" do
-        record = Setup.Record.record()
-        assert Setup.Record.record(record) == Setup.Record.StructyRecord.record(record)
-        assert Setup.Record.update!(record, []) == Setup.Record.StructyRecord.record(record, [])
-        assert Setup.Record.record?(record) == match?(Setup.Record.StructyRecord.record(), record)
-      end
-    end
-
-    describe "keypos/1" do
-      test "to get the 1-based index of the given field in a record" do
-        assert Setup.Record.keypos(:keypos) ==
-                 1 + Setup.Record.StructyRecord.record(:keypos)
-      end
-    end
-
-    test "warns about field names that conflict with reserved names" do
-      warnings = Setup.warnings()
-
-      record = Setup.Record.record()
-      fields = record |> Setup.Record.to_list() |> Keyword.keys()
-
-      for field <- fields do
-        assert warnings =~ ~r/warning: .+Field name #{inspect(field)} conflicts with .+/,
-               "should warn about #{inspect(field)} field name conflict"
       end
     end
   end

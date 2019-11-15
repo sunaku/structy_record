@@ -10,19 +10,6 @@ defmodule StructyRecord do
 
   """
 
-  @reserved_field_names [
-    :record,
-    :record?,
-    :fetch,
-    :update,
-    :update!,
-    :index,
-    :keypos,
-    :inspect,
-    :to_list,
-    :from_list
-  ]
-
   @doc """
   Defines a module named `alias` that is also a `Record` composed of `fields`.
 
@@ -56,8 +43,8 @@ defmodule StructyRecord do
   - `record/2` to update an existing record with the given fields and values
   - `fetch/2` to get the value of a given field in a given record
   - `update/2` to update an existing record with the given fields and values
-  - `${field}/1` to get the value of a specific field in a given record
-  - `${field}/2` to set the value of a specific field in a given record
+  - `get_${field}/1` to fetch the value of a specific field in a given record
+  - `set_${field}/2` to update the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
   - `to_list/1` to convert a record into a list of its fields and values
@@ -77,7 +64,7 @@ defmodule StructyRecord do
 
       StructyRecord.defrecord Rectangle, [:width, :height] do
         def area(r=record()) do
-          width(r) * height(r)
+          get_width(r) * get_height(r)
         end
 
         def perimeter(record(width: w, height: h)) do
@@ -112,17 +99,17 @@ defmodule StructyRecord do
 
   Get values of fields in those instances:
 
-      tall |> Rectangle.height()            #-> 25
+      tall |> Rectangle.get_height()        #-> 25
       tall |> Rectangle.record(:height)     #-> 25
       Rectangle.record(height: h) = tall; h #-> 25
 
   Set values of fields in those instances:
 
-      even |> Rectangle.width(1)         #-> {Rectangle, 1, 10}
+      even |> Rectangle.set_width(1)     #-> {Rectangle, 1, 10}
       even |> Rectangle.record(width: 1) #-> {Rectangle, 1, 10}
 
-      even |> Rectangle.width(1) |> Rectangle.height(2) #-> {Rectangle, 1, 2}
-      even |> Rectangle.record(width: 1, height: 2)     #-> {Rectangle, 1, 2}
+      even |> Rectangle.set_width(1) |> Rectangle.set_height(2) #-> {Rectangle, 1, 2}
+      even |> Rectangle.record(width: 1, height: 2)             #-> {Rectangle, 1, 2}
 
   Use your custom code on those instances:
 
@@ -339,22 +326,14 @@ defmodule StructyRecord do
   end
 
   defp field_accessors(fields) do
-    {reserved_fields, allowed_fields} = reserved_vs_allowed_fields(fields)
-    warnings = reserved_fields |> Enum.map(&reserved_field_warning/1)
-    getters = allowed_fields |> Enum.map(&getter_macro/1)
-    setters = allowed_fields |> Enum.map(&setter_macro/1)
+    names = fields |> field_names()
+    getters = names |> Enum.map(&getter_macro/1)
+    setters = names |> Enum.map(&setter_macro/1)
 
     quote do
-      unquote(warnings)
       unquote(getters)
       unquote(setters)
     end
-  end
-
-  defp reserved_vs_allowed_fields(fields) do
-    fields
-    |> field_names()
-    |> Enum.split_with(&reserved_field?/1)
   end
 
   defp field_names(fields) do
@@ -365,26 +344,12 @@ defmodule StructyRecord do
     end
   end
 
-  defp reserved_field?(name) do
-    name in @reserved_field_names
-  end
-
-  defp reserved_field_warning(field) do
-    quote do
-      IO.warn(
-        "(StructyRecord) Field name #{inspect(unquote(field))} conflicts with existing #{
-          inspect(StructyRecord_Interface)
-        }.#{unquote(field)}() macro, so field accessor macros will not be defined for this name."
-      )
-    end
-  end
-
   defp getter_macro(field) do
     quote do
       @doc """
-      Gets the value of #{unquote(inspect(field))} field in the given record.
+      Fetches the value of the `#{unquote(inspect(field))}` field in the given record.
       """
-      defmacro unquote(field)(record) do
+      defmacro unquote(:"get_#{field}")(record) do
         quote do
           StructyRecord_Definition.record(unquote(record), :field)
         end
@@ -400,9 +365,9 @@ defmodule StructyRecord do
   defp setter_macro(field) do
     quote do
       @doc """
-      Sets the value of #{unquote(inspect(field))} field in the given record.
+      Updates the value of the `#{unquote(inspect(field))}` field in the given record.
       """
-      defmacro unquote(field)(record, value) do
+      defmacro unquote(:"set_#{field}")(record, value) do
         quote do
           StructyRecord_Definition.record(unquote(record), unquote(value))
         end
