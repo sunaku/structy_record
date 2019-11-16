@@ -41,8 +41,8 @@ defmodule StructyRecord do
   - `record/1` to convert a record into a list of its fields and values
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
-  - `create/0` to create a new record with default values for all fields
-  - `create/1` to create a new record with the given fields and values
+  - `new/0` to create a new record with default values for all fields
+  - `new/1` to create a new record with the given fields and values
   - `fetch/2` to get the value of a given field in a given record
   - `update/2` to update an existing record with the given fields and values
   - `get_${field}/1` to fetch the value of a specific field in a given record
@@ -220,7 +220,7 @@ defmodule StructyRecord do
       Creates a new record with the given fields and values. If omitted or
       partly specified, default values will be used for unspecified fields.
       """
-      defmacro create(contents \\ []) do
+      defmacro new(contents \\ []) do
         quote do
           StructyRecord_Definition.record(unquote(contents))
         end

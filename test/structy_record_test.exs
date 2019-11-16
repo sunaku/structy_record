@@ -47,9 +47,9 @@ defmodule StructyRecordTest do
 
     ## elixiry_interface
 
-    describe "create/0" do
+    describe "new/0" do
       test "to create a new record with default values for all fields" do
-        assert Setup.Record.create() == Setup.Record.record()
+        assert Setup.Record.new() == Setup.Record.StructyRecord.record()
       end
     end
 
@@ -107,9 +107,9 @@ defmodule StructyRecordTest do
 
     ## elixiry_interface
 
-    describe "create/1" do
+    describe "new/1" do
       test "to create a new record with the given fields and values" do
-        assert Setup.Record.create(one: 1) ==
+        assert Setup.Record.new(one: 1) ==
                  Setup.Record.StructyRecord.record(one: 1)
       end
     end
