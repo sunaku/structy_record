@@ -207,8 +207,7 @@ defmodule StructyRecord do
       """
       defmacro record?(record) do
         quote do
-          StructyRecord_Interface.is_record(unquote(record)) and
-            match?(StructyRecord_Definition.record(), unquote(record))
+          match?(StructyRecord_Definition.record(), unquote(record))
         end
       end
     end
