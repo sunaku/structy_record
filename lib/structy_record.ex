@@ -144,6 +144,7 @@ defmodule StructyRecord do
       require Record, as: StructyRecord_Record
 
       defmodule unquote(definition) do
+        @moduledoc false
         StructyRecord_Record.defrecord(:record, unquote(alias), unquote(fields))
       end
 
