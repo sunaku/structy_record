@@ -58,12 +58,6 @@ defmodule StructyRecordTest do
         record = Setup.Record.record()
         assert Setup.Record.to_list(record) == []
       end
-
-      test "disambiguate record/2 which creates a record from Keyword list" do
-        assert_raise ArgumentError, "expected a #{inspect(Setup.Record)} record, got []", fn ->
-          Setup.Record.to_list([])
-        end
-      end
     end
 
     describe "inspect/2" do
@@ -118,20 +112,6 @@ defmodule StructyRecordTest do
         assert Setup.Record.create(one: 1) ==
                  Setup.Record.StructyRecord.record(one: 1)
       end
-
-      test "disambiguate record/1 which also accepts an atom" do
-        assert_raise ArgumentError, "expected a Keyword list, got :one", fn ->
-          Setup.Record.create(:one)
-        end
-      end
-
-      test "disambiguate record/1 which also accepts a record" do
-        record = Setup.Record.StructyRecord.record()
-
-        assert_raise ArgumentError, "expected a Keyword list, got #{inspect(record)}", fn ->
-          Setup.Record.create(record)
-        end
-      end
     end
 
     describe "index/1" do
@@ -152,14 +132,6 @@ defmodule StructyRecordTest do
         record = Setup.Record.record()
         assert record |> Setup.Record.fetch(:one) == nil
       end
-
-      test "disambiguate update/2 which delegates to record/2 with Keyword list" do
-        record = Setup.Record.record()
-
-        assert_raise ArgumentError, "expected an atom, got []", fn ->
-          record |> Setup.Record.fetch([])
-        end
-      end
     end
 
     describe "update/2" do
@@ -167,14 +139,6 @@ defmodule StructyRecordTest do
         record = Setup.Record.record()
         updated_record = record |> Setup.Record.update(one: 1)
         assert updated_record |> Setup.Record.fetch(:one) == 1
-      end
-
-      test "disambiguate fetch/2 which delegates to record/2 with field atom" do
-        record = Setup.Record.record()
-
-        assert_raise ArgumentError, "expected a Keyword list, got :one", fn ->
-          record |> Setup.Record.update(:one)
-        end
       end
     end
 

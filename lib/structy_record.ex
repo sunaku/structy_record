@@ -222,12 +222,7 @@ defmodule StructyRecord do
       """
       defmacro create(contents \\ []) do
         quote do
-          if Keyword.keyword?(unquote(contents)) do
-            StructyRecord_Definition.record(unquote(contents))
-          else
-            raise ArgumentError,
-                  "expected a Keyword list, got #{inspect(unquote(contents))}"
-          end
+          StructyRecord_Definition.record(unquote(contents))
         end
       end
 
@@ -254,14 +249,7 @@ defmodule StructyRecord do
       """
       defmacro to_list(record) do
         quote do
-          if StructyRecord_Interface.record?(unquote(record)) do
-            StructyRecord_Definition.record(unquote(record))
-          else
-            raise ArgumentError,
-                  "expected a #{inspect(StructyRecord_Interface)} record, got #{
-                    inspect(unquote(record))
-                  }"
-          end
+          StructyRecord_Definition.record(unquote(record))
         end
       end
 
@@ -270,12 +258,7 @@ defmodule StructyRecord do
       """
       defmacro fetch(record, field) do
         quote do
-          if is_atom(unquote(field)) do
-            StructyRecord_Definition.record(unquote(record), unquote(field))
-          else
-            raise ArgumentError,
-                  "expected an atom, got #{inspect(unquote(field))}"
-          end
+          StructyRecord_Definition.record(unquote(record), unquote(field))
         end
       end
 
@@ -284,12 +267,7 @@ defmodule StructyRecord do
       """
       defmacro update(record, updates) do
         quote do
-          if Keyword.keyword?(unquote(updates)) do
-            StructyRecord_Definition.record(unquote(record), unquote(updates))
-          else
-            raise ArgumentError,
-                  "expected a Keyword list, got #{inspect(unquote(updates))}"
-          end
+          StructyRecord_Definition.record(unquote(record), unquote(updates))
         end
       end
 
