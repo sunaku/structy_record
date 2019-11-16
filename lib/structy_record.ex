@@ -210,28 +210,6 @@ defmodule StructyRecord do
             match?(StructyRecord_Definition.record(), unquote(record))
         end
       end
-
-      @doc """
-      Creates a new record _at runtime_ with the given fields and values.
-      """
-      def from_list(contents) do
-        merge(StructyRecord_Definition.record(), contents)
-      end
-
-      @doc """
-      Updates the given record _at runtime_ with the given fields and values.
-      """
-      def merge(record, updates) do
-        template = record |> StructyRecord_Definition.record()
-
-        contents =
-          template
-          |> Enum.map(fn {field, default_value} ->
-            Access.get(updates, field, default_value)
-          end)
-
-        [StructyRecord_Interface | contents] |> :erlang.list_to_tuple()
-      end
     end
   end
 
@@ -255,18 +233,18 @@ defmodule StructyRecord do
       @doc """
       Returns the zero-based index of the given field in this kind of record.
       """
-      defmacro index(args) do
+      defmacro index(field) do
         quote do
-          StructyRecord_Definition.record(unquote(args))
+          StructyRecord_Definition.record(unquote(field))
         end
       end
 
       @doc """
       Returns the 1-based position of the given field in this kind of record.
       """
-      defmacro keypos(args) do
+      defmacro keypos(field) do
         quote do
-          1 + StructyRecord_Interface.index(unquote(args))
+          1 + StructyRecord_Interface.index(unquote(field))
         end
       end
 
@@ -312,6 +290,28 @@ defmodule StructyRecord do
                   "expected a Keyword list, got #{inspect(unquote(updates))}"
           end
         end
+      end
+
+      @doc """
+      Creates a new record _at runtime_ with the given fields and values.
+      """
+      def from_list(contents) do
+        merge(StructyRecord_Definition.record(), contents)
+      end
+
+      @doc """
+      Updates the given record _at runtime_ with the given fields and values.
+      """
+      def merge(record, updates) do
+        template = record |> StructyRecord_Definition.record()
+
+        contents =
+          template
+          |> Enum.map(fn {field, default_value} ->
+            Access.get(updates, field, default_value)
+          end)
+
+        [StructyRecord_Interface | contents] |> :erlang.list_to_tuple()
       end
 
       @doc """
