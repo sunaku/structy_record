@@ -53,7 +53,7 @@ defmodule StructyRecord do
 
   Functions:
   - `from_list/1` to create a new record _at runtime_ with the given fields and values
-  - `update!/2` to update an existing record with the given fields and values
+  - `merge/2` to update an existing record with the given fields and values
   - `inspect/2` to inspect the contents of a record using `Kernel.inspect/2`
 
   ## Examples
@@ -215,13 +215,13 @@ defmodule StructyRecord do
       Creates a new record _at runtime_ with the given fields and values.
       """
       def from_list(contents) do
-        update!(StructyRecord_Definition.record(), contents)
+        merge(StructyRecord_Definition.record(), contents)
       end
 
       @doc """
       Updates the given record _at runtime_ with the given fields and values.
       """
-      def update!(record, updates) do
+      def merge(record, updates) do
         template = record |> StructyRecord_Definition.record()
 
         contents =
