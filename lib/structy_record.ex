@@ -261,16 +261,21 @@ defmodule StructyRecord do
       @doc """
       Creates a new record _at runtime_ with the given fields and values.
       """
-      def from_list(contents) do
-        update(StructyRecord_Definition.record(), contents)
+      defmacro from_list(contents) do
+        quote bind_quoted: [contents: contents] do
+          record = StructyRecord_Definition.record()
+          StructyRecord_Interface.update(record, contents)
+        end
       end
 
       @doc """
       Updates the given record _at runtime_ with the given fields and values.
       """
-      def update(record, updates) do
-        template = record |> StructyRecord_Definition.record()
-        updates |> StructyRecord.from_list(StructyRecord_Interface, template)
+      defmacro update(record, updates) do
+        quote bind_quoted: [record: record, updates: updates] do
+          template = record |> StructyRecord_Definition.record()
+          StructyRecord.from_list(updates, StructyRecord_Interface, template)
+        end
       end
 
       @doc """
