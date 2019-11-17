@@ -270,15 +270,7 @@ defmodule StructyRecord do
       """
       def update(record, updates) do
         template = record |> StructyRecord_Definition.record()
-
-        contents =
-          template
-          |> Enum.map(fn {field, default_value} ->
-            updated_value = Access.get(updates, field, default_value)
-            {field, updated_value}
-          end)
-
-        contents |> StructyRecord.from_list(StructyRecord_Interface)
+        updates |> StructyRecord.from_list(StructyRecord_Interface, template)
       end
 
       @doc """
@@ -370,5 +362,23 @@ defmodule StructyRecord do
   def from_list(contents, record_tag) do
     values = Keyword.values(contents)
     [record_tag | values] |> :erlang.list_to_tuple()
+  end
+
+  @doc """
+  Creates a new record of the given type with the given fields and values
+  according to the given template of known fields and their default values.
+  """
+  def from_list(contents, record_tag, record_template) do
+    contents
+    |> intersect(record_template)
+    |> from_list(record_tag)
+  end
+
+  defp intersect(contents, template) do
+    template
+    |> Enum.map(fn {field, template_value} ->
+      value = Access.get(contents, field, template_value)
+      {field, value}
+    end)
   end
 end

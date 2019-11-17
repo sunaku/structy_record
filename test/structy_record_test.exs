@@ -22,6 +22,36 @@ defmodule StructyRecordTest do
     end
   end
 
+  describe "from_list/3" do
+    test "empty" do
+      assert [] |> StructyRecord.from_list(Foobar, []) == {Foobar}
+    end
+
+    test "empty contents: retain template" do
+      template = [known: :default_value]
+      contents = []
+      assert contents |> StructyRecord.from_list(Foobar, template) == {Foobar, :default_value}
+    end
+
+    test "empty template: ignore contents" do
+      template = []
+      contents = [known: :content_value]
+      assert contents |> StructyRecord.from_list(Foobar, template) == {Foobar}
+    end
+
+    test "intersection: overwrite template value with content value" do
+      template = [known: :default_value]
+      contents = [known: :content_value]
+      assert contents |> StructyRecord.from_list(Foobar, template) == {Foobar, :content_value}
+    end
+
+    test "difference: ignore content values that aren't in template" do
+      template = [known: :default_value]
+      contents = [known: :content_value, unknown_extra_contents: nil]
+      assert contents |> StructyRecord.from_list(Foobar, template) == {Foobar, :content_value}
+    end
+  end
+
   import TestHelper, only: :macros
 
   describe_defrecord "no fields in record", [] do
