@@ -114,10 +114,10 @@ defmodule StructyRecordTest do
       end
     end
 
-    describe "fetch/2" do
-      test "to access a given field in a given record" do
+    describe "get/2" do
+      test "to fetch the value of a given field in a given record" do
         record = Setup.Record.record()
-        assert record |> Setup.Record.fetch(:one) == nil
+        assert record |> Setup.Record.get(:one) == nil
       end
     end
 
@@ -125,7 +125,7 @@ defmodule StructyRecordTest do
       test "to update an existing record with the given fields and values" do
         record = Setup.Record.record()
         updated_record = record |> Setup.Record.update(one: 1)
-        assert updated_record |> Setup.Record.fetch(:one) == 1
+        assert updated_record |> Setup.Record.get(:one) == 1
       end
     end
 
