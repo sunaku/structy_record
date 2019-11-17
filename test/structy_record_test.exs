@@ -8,6 +8,20 @@ defmodule StructyRecordTest do
     end
   end
 
+  describe "from_list/2" do
+    test "empty" do
+      assert [] |> StructyRecord.from_list(Foobar) == {Foobar}
+    end
+
+    test "single" do
+      assert [one: 1] |> StructyRecord.from_list(Foobar) == {Foobar, 1}
+    end
+
+    test "double" do
+      assert [one: 1, two: 2] |> StructyRecord.from_list(Foobar) == {Foobar, 1, 2}
+    end
+  end
+
   import TestHelper, only: :macros
 
   describe_defrecord "no fields in record", [] do
