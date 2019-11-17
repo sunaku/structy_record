@@ -239,7 +239,7 @@ defmodule StructyRecord do
       """
       defmacro keypos(field) do
         quote do
-          1 + StructyRecord_Interface.index(unquote(field))
+          1 + StructyRecord_Definition.record(unquote(field))
         end
       end
 
