@@ -42,7 +42,7 @@ defmodule StructyRecord do
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
   - `get/2` to fetch the value of a given field in a given record
-  - `update/2` to update an existing record with the given fields and values
+  - `set/2` to update an existing record with the given fields and values
   - `get_${field}/1` to fetch the value of a specific field in a given record
   - `set_${field}/2` to update the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
@@ -252,7 +252,7 @@ defmodule StructyRecord do
       @doc """
       Updates the given record with the given fields and values.
       """
-      defmacro update(record, updates) do
+      defmacro set(record, updates) do
         quote do
           StructyRecord_Definition.record(unquote(record), unquote(updates))
         end

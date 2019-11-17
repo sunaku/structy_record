@@ -121,10 +121,10 @@ defmodule StructyRecordTest do
       end
     end
 
-    describe "update/2" do
+    describe "set/2" do
       test "to update an existing record with the given fields and values" do
         record = Setup.Record.record()
-        updated_record = record |> Setup.Record.update(one: 1)
+        updated_record = record |> Setup.Record.set(one: 1)
         assert updated_record |> Setup.Record.get(:one) == 1
       end
     end
