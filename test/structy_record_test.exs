@@ -47,12 +47,6 @@ defmodule StructyRecordTest do
 
     ## elixiry_interface
 
-    describe "new/0" do
-      test "to create a new record with default values for all fields" do
-        assert Setup.Record.new() == Setup.Record.StructyRecord.record()
-      end
-    end
-
     describe "to_list/1" do
       test "to convert a record into a Keyword list" do
         record = Setup.Record.record()
@@ -106,13 +100,6 @@ defmodule StructyRecordTest do
     end
 
     ## elixiry_interface
-
-    describe "new/1" do
-      test "to create a new record with the given fields and values" do
-        assert Setup.Record.new(one: 1) ==
-                 Setup.Record.StructyRecord.record(one: 1)
-      end
-    end
 
     describe "index/1" do
       test "to get the zero-based index of the given field in a record" do

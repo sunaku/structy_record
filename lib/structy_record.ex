@@ -41,8 +41,6 @@ defmodule StructyRecord do
   - `record/1` to convert a record into a list of its fields and values
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
-  - `new/0` to create a new record with default values for all fields
-  - `new/1` to create a new record with the given fields and values
   - `fetch/2` to get the value of a given field in a given record
   - `update/2` to update an existing record with the given fields and values
   - `get_${field}/1` to fetch the value of a specific field in a given record
@@ -215,16 +213,6 @@ defmodule StructyRecord do
 
   defp elixiry_interface do
     quote do
-      @doc """
-      Creates a new record with the given fields and values. If omitted or
-      partly specified, default values will be used for unspecified fields.
-      """
-      defmacro new(contents \\ []) do
-        quote do
-          StructyRecord_Definition.record(unquote(contents))
-        end
-      end
-
       @doc """
       Returns the zero-based index of the given field in this kind of record.
       """
