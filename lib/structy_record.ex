@@ -281,27 +281,11 @@ defmodule StructyRecord do
       @doc """
       Inspects the contents of the given record using `Kernel.inspect/2`.
       """
-      def inspect(record, options \\ []) do
-        options_without_label = Keyword.delete(options, :label)
-        inspect(record, options_without_label, options[:label])
-      end
-
-      defp inspect(record, options_without_label, _label = nil) do
-        inspect =
-          record
-          |> StructyRecord_Definition.record()
-          |> Kernel.inspect(options_without_label)
-
-        # omit enclosing [] square brackets from inspected Keyword list
-        length_of_contents = byte_size(inspect) - 2
-        <<?[, contents::binary-size(length_of_contents), ?]>> = inspect
-
-        "#{inspect(StructyRecord_Interface)}.record(#{contents})"
-      end
-
-      defp inspect(record, options_without_label, label) do
-        inspect = inspect(record, options_without_label, _label = nil)
-        "#{label}: #{inspect}"
+      defmacro inspect(record, options \\ []) do
+        quote bind_quoted: [record: record, options: options] do
+          contents = record |> StructyRecord_Definition.record()
+          StructyRecord.inspect(contents, StructyRecord_Interface, options)
+        end
       end
     end
   end
@@ -385,5 +369,18 @@ defmodule StructyRecord do
       value = Access.get(contents, field, template_value)
       {field, value}
     end)
+  end
+
+  @doc """
+  Inspects the contents of the given record type using `Kernel.inspect/2`.
+  """
+  def inspect(contents, record_tag, options \\ []) when is_list(contents) do
+    inspected_list = Kernel.inspect(contents, options)
+
+    # omit enclosing [] square brackets from inspected Keyword list
+    length = byte_size(inspected_list) - 2
+    <<?[, list_contents::binary-size(length), ?]>> = inspected_list
+
+    "#{inspect(record_tag)}.record(#{list_contents})"
   end
 end

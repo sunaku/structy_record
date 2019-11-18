@@ -52,6 +52,27 @@ defmodule StructyRecordTest do
     end
   end
 
+  describe "inspect/3" do
+    test "empty" do
+      assert [] |> StructyRecord.inspect(Foobar) == "Foobar.record()"
+    end
+
+    test "single" do
+      assert [one: 1] |> StructyRecord.inspect(Foobar) == "Foobar.record(one: 1)"
+    end
+
+    test "supports Kernel.inspect/2 options" do
+      assert [one: 1, two: 2] |> StructyRecord.inspect(Foobar, limit: 1) ==
+               "Foobar.record(one: 1, ...)"
+    end
+
+    test "invalid: contents must be a list" do
+      assert_raise FunctionClauseError, fn ->
+        StructyRecord.inspect("string", Foobar)
+      end
+    end
+  end
+
   import TestHelper, only: :macros
 
   describe_defrecord "no fields in record", [] do
@@ -103,7 +124,6 @@ defmodule StructyRecordTest do
         record = Setup.Record.record()
         module = inspect(Setup.Record)
         assert Setup.Record.inspect(record) == "#{module}.record()"
-        assert Setup.Record.inspect(record, label: "foo") == "foo: #{module}.record()"
       end
     end
   end
