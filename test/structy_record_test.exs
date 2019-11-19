@@ -16,15 +16,11 @@ defmodule StructyRecordTest do
     end
 
     test "single: field is found" do
-      assert StructyRecord.index(:field, Foobar, [:field]) == 1
-    end
-
-    test "single: field with default value is found" do
-      assert StructyRecord.index(:field, Foobar, field: :default_value) == 1
+      assert StructyRecord.index(:field, Foobar, field: nil) == 1
     end
 
     test "double: field is found" do
-      assert StructyRecord.index(:field, Foobar, [:other, :field]) == 2
+      assert StructyRecord.index(:field, Foobar, other_field: nil, field: nil) == 2
     end
   end
 

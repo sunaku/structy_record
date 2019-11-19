@@ -310,11 +310,11 @@ defmodule StructyRecord do
   end
 
   defp field_names(fields) do
-    if Keyword.keyword?(fields) do
-      Keyword.keys(fields)
-    else
-      fields
-    end
+    fields
+    |> Enum.map(fn
+      {field, _default_value} -> field
+      field -> field
+    end)
   end
 
   defp getter_macro(field) do
@@ -369,12 +369,9 @@ defmodule StructyRecord do
     end
   end
 
-  defp find_index(record_template, field) do
-    Enum.find_index(record_template, fn
-      ^field -> true
-      {^field, _default_value} -> true
-      _else -> false
-    end)
+  defp find_index(template, field) do
+    template
+    |> Enum.find_index(&match?({^field, _default_value}, &1))
   end
 
   @doc """
