@@ -8,6 +8,26 @@ defmodule StructyRecordTest do
     end
   end
 
+  describe "index/3" do
+    test "empty: field not found" do
+      assert_raise ArgumentError, "record Foobar does not have the key: :field", fn ->
+        StructyRecord.index(:field, Foobar, [])
+      end
+    end
+
+    test "single: field is found" do
+      assert StructyRecord.index(:field, Foobar, [:field]) == 1
+    end
+
+    test "single: field with default value is found" do
+      assert StructyRecord.index(:field, Foobar, field: :default_value) == 1
+    end
+
+    test "double: field is found" do
+      assert StructyRecord.index(:field, Foobar, [:other, :field]) == 2
+    end
+  end
+
   describe "from_list/2" do
     test "empty" do
       assert [] |> StructyRecord.from_list(Foobar) == {Foobar}

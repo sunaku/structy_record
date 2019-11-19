@@ -348,6 +348,30 @@ defmodule StructyRecord do
   end
 
   @doc """
+  Returns the zero-based index of the given field in the given kind of record.
+  """
+  def index(field, record_tag, record_template) do
+    case find_index(record_template, field) do
+      nil ->
+        # error out in _exactly_ the same way as Record.index/3 for uniformity
+        raise ArgumentError,
+              "record #{inspect(record_tag)} does not have the key: #{inspect(field)}"
+
+      index ->
+        # add +1 for record_tag which occupies the first position in the tuple
+        1 + index
+    end
+  end
+
+  defp find_index(record_template, field) do
+    Enum.find_index(record_template, fn
+      ^field -> true
+      {^field, _default_value} -> true
+      _else -> false
+    end)
+  end
+
+  @doc """
   Creates a new record of the given type with the given fields and values.
   """
   def from_list(contents, record_tag) do
