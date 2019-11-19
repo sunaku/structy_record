@@ -189,6 +189,11 @@ defmodule StructyRecordTest do
       test "to get the zero-based index of the given field in a record" do
         assert Setup.Record.index(:one) == Setup.Record.StructyRecord.record(:one)
       end
+
+      test "support runtime evaluation via StructyRecord.index() fallback" do
+        runtime = :one
+        assert Setup.Record.index(runtime) == Setup.Record.record(:one)
+      end
     end
 
     describe "keypos/1" do

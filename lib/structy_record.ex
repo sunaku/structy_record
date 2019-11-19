@@ -216,9 +216,17 @@ defmodule StructyRecord do
       @doc """
       Returns the zero-based index of the given field in this kind of record.
       """
-      defmacro index(field) do
+      defmacro index(field) when is_atom(field) do
         quote do
           StructyRecord_Definition.record(unquote(field))
+        end
+      end
+
+      defmacro index(field) do
+        quote bind_quoted: [field: field] do
+          record = StructyRecord_Definition.record()
+          template = record |> StructyRecord_Definition.record()
+          StructyRecord.index(field, StructyRecord_Interface, template)
         end
       end
 
