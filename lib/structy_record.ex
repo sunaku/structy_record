@@ -213,6 +213,9 @@ defmodule StructyRecord do
 
   defp elixiry_interface do
     quote do
+      @record StructyRecord_Definition.record()
+      @template StructyRecord_Definition.record(@record)
+
       @doc """
       Returns the zero-based index of the given field in this kind of record.
       """
@@ -223,9 +226,7 @@ defmodule StructyRecord do
       end
 
       defmacro index(field) do
-        quote bind_quoted: [field: field] do
-          record = StructyRecord_Definition.record()
-          template = record |> StructyRecord_Definition.record()
+        quote bind_quoted: [field: field, template: @template] do
           StructyRecord.index(field, StructyRecord_Interface, template)
         end
       end
@@ -270,10 +271,7 @@ defmodule StructyRecord do
       Creates a new record _at runtime_ with the given fields and values.
       """
       defmacro from_list(contents) do
-        quote bind_quoted: [contents: contents] do
-          record = StructyRecord_Definition.record()
-          # FIXME: these 2 lines are duplicated in the update() macro below
-          template = record |> StructyRecord_Definition.record()
+        quote bind_quoted: [contents: contents, template: @template] do
           StructyRecord.from_list(contents, StructyRecord_Interface, template)
         end
       end
