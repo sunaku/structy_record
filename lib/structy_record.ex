@@ -264,7 +264,9 @@ defmodule StructyRecord do
       defmacro from_list(contents) do
         quote bind_quoted: [contents: contents] do
           record = StructyRecord_Definition.record()
-          StructyRecord_Interface.update(record, contents)
+          # FIXME: these 2 lines are duplicated in the update() macro below
+          template = record |> StructyRecord_Definition.record()
+          StructyRecord.from_list(contents, StructyRecord_Interface, template)
         end
       end
 
