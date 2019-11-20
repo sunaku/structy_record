@@ -1,50 +1,22 @@
 ExUnit.start()
 
 defmodule TestHelper do
-  defmacro describe_defrecord(description, fields, do_block) do
-    quote do
-      defmodule unquote(Module.concat([__MODULE__, description])) do
-        defmodule Setup do
-          define_the_record = fn ->
-            require StructyRecord
+  require StructyRecord
 
-            StructyRecord.defrecord Record, unquote(fields) do
-              defmacro macro(arg) do
-                quote do
-                  unquote(arg)
-                end
-              end
+  StructyRecord.defrecord(NoFields, [])
+  StructyRecord.defrecord(OneField, [:one])
+  StructyRecord.defrecord(OneFieldWithDefaultValue, one: 1)
 
-              def function(arg), do: arg
-
-              def function_using_macros(r = record()), do: r
-            end
-          end
-
-          import ExUnit.CaptureIO
-          @warnings capture_io(:stderr, define_the_record)
-          def warnings, do: @warnings
-        end
-
-        defmodule Test do
-          use ExUnit.Case, async: true
-          use Setup.Record
-
-          describe "defrecord/3" do
-            test "injects do..end block into module definition" do
-              assert Setup.Record.macro(:ok) == :ok
-              assert Setup.Record.function(:ok) == :ok
-            end
-
-            test "record() macros can be used in do..end block" do
-              record = Setup.Record.record()
-              assert record |> Setup.Record.function_using_macros() == record
-            end
-          end
-
-          unquote(do_block)
-        end
+  StructyRecord.defrecord NoFieldsWithCustomDoBlock, [] do
+    defmacro macro(arg) do
+      quote do
+        unquote(arg)
       end
     end
+
+    def function(arg), do: arg
+
+    def function_using_macros, do: function_using_macros(record())
+    def function_using_macros(r = record()), do: r
   end
 end
