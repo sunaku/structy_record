@@ -47,6 +47,7 @@ defmodule StructyRecord do
   - `set_${field}/2` to update the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
+  - `to_list/0` to get a template of fields and default values for this record
   - `to_list/1` to convert a record into a list of its fields and values
 
   Functions:
@@ -237,6 +238,15 @@ defmodule StructyRecord do
       defmacro keypos(field) do
         quote do
           1 + StructyRecord_Definition.record(unquote(field))
+        end
+      end
+
+      @doc """
+      Returns a template of fields and default values for this kind of record.
+      """
+      defmacro to_list do
+        quote do
+          unquote(@template)
         end
       end
 

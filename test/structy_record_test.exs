@@ -244,6 +244,14 @@ defmodule StructyRecordTest do
     end
   end
 
+  describe "to_list/0" do
+    test "to get a template of fields and default values for this record" do
+      assert NoFields.to_list() == []
+      assert OneField.to_list() == [one: nil]
+      assert OneFieldWithDefaultValue.to_list() == [one: 1]
+    end
+  end
+
   describe "to_list/1" do
     test "to convert a record into a Keyword list" do
       record = NoFields.record()
