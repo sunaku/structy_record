@@ -98,12 +98,12 @@ defmodule StructyRecord do
 
   Inspect the contents of those instances:
 
-      rect |> Rectangle.inspect() #-> "Rectangle.record(width: nil, height: nil)"
-      no_h |> Rectangle.inspect() #-> "Rectangle.record(width: 1, height: nil)"
-      no_w |> Rectangle.inspect() #-> "Rectangle.record(width: nil, height: 2)"
-      wide |> Rectangle.inspect() #-> "Rectangle.record(width: 10, height: 5)"
-      tall |> Rectangle.inspect() #-> "Rectangle.record(width: 4, height: 25)"
-      even |> Rectangle.inspect() #-> "Rectangle.record(width: 10, height: 10)"
+      rect |> Rectangle.inspect() #-> "Rectangle.{[width: nil, height: nil]}"
+      no_h |> Rectangle.inspect() #-> "Rectangle.{[width: 1, height: nil]}"
+      no_w |> Rectangle.inspect() #-> "Rectangle.{[width: nil, height: 2]}"
+      wide |> Rectangle.inspect() #-> "Rectangle.{[width: 10, height: 5]}"
+      tall |> Rectangle.inspect() #-> "Rectangle.{[width: 4, height: 25]}"
+      even |> Rectangle.inspect() #-> "Rectangle.{[width: 10, height: 10]}"
 
   Get values of fields in those instances:
 
@@ -461,12 +461,9 @@ defmodule StructyRecord do
   Inspects the contents of the given record type using `Kernel.inspect/2`.
   """
   def inspect(contents, record_tag, options \\ []) when is_list(contents) do
-    inspected_list = Kernel.inspect(contents, options)
-
-    # omit enclosing [] square brackets from inspected Keyword list
-    length = byte_size(inspected_list) - 2
-    <<?[, list_contents::binary-size(length), ?]>> = inspected_list
-
-    "#{inspect(record_tag)}.record(#{list_contents})"
+    "#{inspect(record_tag)}.{#{inspect_contents(contents, options)}}"
   end
+
+  defp inspect_contents([], _), do: ""
+  defp inspect_contents(list, options), do: Kernel.inspect(list, options)
 end

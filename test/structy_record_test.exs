@@ -92,16 +92,16 @@ defmodule StructyRecordTest do
 
   describe "inspect/3" do
     test "empty" do
-      assert [] |> StructyRecord.inspect(Foobar) == "Foobar.record()"
+      assert [] |> StructyRecord.inspect(Foobar) == "Foobar.{}"
     end
 
     test "single" do
-      assert [one: 1] |> StructyRecord.inspect(Foobar) == "Foobar.record(one: 1)"
+      assert [one: 1] |> StructyRecord.inspect(Foobar) == "Foobar.{[one: 1]}"
     end
 
     test "supports Kernel.inspect/2 options" do
       assert [one: 1, two: 2] |> StructyRecord.inspect(Foobar, limit: 1) ==
-               "Foobar.record(one: 1, ...)"
+               "Foobar.{[one: 1, ...]}"
     end
 
     test "invalid: contents must be a list" do
@@ -310,10 +310,10 @@ defmodule StructyRecordTest do
     test "to pretty-print a record with its field names and values" do
       record = NoFields.{}
       module = inspect(NoFields)
-      assert NoFields.inspect(record) == "#{module}.record()"
+      assert NoFields.inspect(record) == "#{module}.{}"
 
       record = OneField.{[one: 1]}
-      assert OneField.inspect(record) == "#{inspect(OneField)}.record(one: 1)"
+      assert OneField.inspect(record) == "#{inspect(OneField)}.{[one: 1]}"
     end
   end
 
