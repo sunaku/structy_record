@@ -34,6 +34,12 @@ defmodule StructyRecord do
   - `is_record/1` to check if argument _loosely_ matches this record's shape
 
   Macros:
+  - `{}/0` to create a new record with default values for all fields
+  - `{}/1` to create a new record with the given fields and values
+  - `{}/1` to get the zero-based index of the given field in a record
+  - `{{}}/1` to convert a record into a list of its fields and values
+  - `{{}}/2` to get the value of a given field in a given record
+  - `{{}}/2` to update an existing record with the given fields and values
   - `record?/1` to check if argument _strictly_ matches this record's shape
   - `record/0` to create a new record with default values for all fields
   - `record/1` to create a new record with the given fields and values
@@ -82,12 +88,13 @@ defmodule StructyRecord do
 
   Create instances of your structy record:
 
-      rect = Rectangle.record()                      #-> {Rectangle, nil, nil}
-      no_h = Rectangle.record(width: 1)              #-> {Rectangle, 1, nil}
-      no_w = Rectangle.record(height: 2)             #-> {Rectangle, nil, 2}
-      wide = Rectangle.record(width: 10, height: 5)  #-> {Rectangle, 10, 5}
-      tall = Rectangle.record(width: 4, height: 25)  #-> {Rectangle, 4, 25}
-      even = Rectangle.record(width: 10, height: 10) #-> {Rectangle, 10, 10}
+      rect = Rectangle.{}                        #-> {Rectangle, nil, nil}
+      rect = Rectangle.{[]}                      #-> {Rectangle, nil, nil}
+      no_h = Rectangle.{[width: 1]}              #-> {Rectangle, 1, nil}
+      no_w = Rectangle.{[height: 2]}             #-> {Rectangle, nil, 2}
+      wide = Rectangle.{[width: 10, height: 5]}  #-> {Rectangle, 10, 5}
+      tall = Rectangle.{[width: 4, height: 25]}  #-> {Rectangle, 4, 25}
+      even = Rectangle.{[width: 10, height: 10]} #-> {Rectangle, 10, 10}
 
   Inspect the contents of those instances:
 
@@ -100,15 +107,17 @@ defmodule StructyRecord do
 
   Get values of fields in those instances:
 
-      tall |> Rectangle.get_height()        #-> 25
-      tall |> Rectangle.record(:height)     #-> 25
-      Rectangle.record(height: h) = tall; h #-> 25
+      Rectangle.{{tall, :height}}       #-> 25
+      Rectangle.{[height: h]} = tall; h #-> 25
+      tall |> Rectangle.get_height()    #-> 25
 
   Set values of fields in those instances:
 
+      Rectangle.{{even, width: 1}}       #-> {Rectangle, 1, 10}
       even |> Rectangle.set_width(1)     #-> {Rectangle, 1, 10}
       even |> Rectangle.record(width: 1) #-> {Rectangle, 1, 10}
 
+      Rectangle.{{even, width: 1, height: 2}}                   #-> {Rectangle, 1, 2}
       even |> Rectangle.set_width(1) |> Rectangle.set_height(2) #-> {Rectangle, 1, 2}
       even |> Rectangle.record(width: 1, height: 2)             #-> {Rectangle, 1, 2}
 
@@ -172,6 +181,44 @@ defmodule StructyRecord do
 
   defp record_primitives do
     quote do
+      @doc """
+      Creates a new record with fields set to default values.
+      """
+      defmacro {} do
+        quote do
+          StructyRecord_Definition.record()
+        end
+      end
+
+      @doc """
+      Either fetches the value of a given field in a given record,
+      or updates the given record with the given fields and values.
+      """
+      defmacro {{record, field_or_updates}} do
+        quote do
+          StructyRecord_Definition.record(unquote(record), unquote(field_or_updates))
+        end
+      end
+
+      @doc """
+      Converts the given record into a list of its fields and values.
+      """
+      defmacro {{_tag = :{}, _context, [record]}} do
+        quote do
+          StructyRecord_Definition.record(unquote(record))
+        end
+      end
+
+      @doc """
+      Either creates a new record with the given fields and values,
+      or returns the zero-based index of the given field in a record.
+      """
+      defmacro {contents_or_field_or_record} do
+        quote do
+          StructyRecord_Definition.record(unquote(contents_or_field_or_record))
+        end
+      end
+
       @doc """
       Either creates a new record with the given fields and values,
       or returns the zero-based index of the given field in a record,

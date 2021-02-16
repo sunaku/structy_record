@@ -117,6 +117,48 @@ defmodule StructyRecordTest do
   use OneField
   use OneFieldWithDefaultValue
 
+  describe "{}/0" do
+    test "to create a new record with default values for all fields" do
+      require Record
+      assert NoFields.{} |> elem(0) == NoFields
+      assert NoFields.{} |> Record.is_record(NoFields)
+      assert NoFields.{} == NoFields.StructyRecord.record()
+    end
+  end
+
+  describe "{}/1" do
+    test "to create a new record with the given fields and values" do
+      assert OneField.{[one: 1]} == OneField.StructyRecord.record(one: 1)
+    end
+
+    test "to get the zero-based index of the given field in a record" do
+      assert OneField.{:one} == OneField.StructyRecord.record(:one)
+    end
+  end
+
+  describe "{{}}/1" do
+    test "to convert the given record to a keyword list" do
+      record = OneField.{}
+      assert OneField.{{record}} == OneField.StructyRecord.record(record)
+    end
+  end
+
+  describe "{{}}/2" do
+    test "to access a given field in a given record" do
+      record = OneField.{}
+      assert OneField.{{record, :one}} == nil
+
+      record = OneFieldWithDefaultValue.{}
+      assert OneFieldWithDefaultValue.{{record, :one}} == 1
+    end
+
+    test "to update an existing record with the given fields and values" do
+      record = OneField.{}
+      updated_record = OneField.{{record, one: 1}}
+      assert OneField.{{updated_record, :one}} == 1
+    end
+  end
+
   describe "record/0" do
     test "to create a new record with default values for all fields" do
       require Record
@@ -143,15 +185,15 @@ defmodule StructyRecordTest do
 
   describe "record/2" do
     test "to access a given field in a given record" do
-      record = OneField.record()
+      record = OneField.{}
       assert record |> OneField.record(:one) == nil
 
-      record = OneFieldWithDefaultValue.record()
+      record = OneFieldWithDefaultValue.{}
       assert record |> OneFieldWithDefaultValue.record(:one) == 1
     end
 
     test "to update an existing record with the given fields and values" do
-      record = OneField.record()
+      record = OneField.{}
       updated_record = record |> OneField.record(one: 1)
       assert updated_record |> OneField.record(:one) == 1
     end
@@ -159,6 +201,7 @@ defmodule StructyRecordTest do
 
   describe "is_record/1" do
     test "checks if argument _loosely_ matches the shape of this record" do
+      assert NoFields.{} |> NoFields.is_record()
       assert NoFields.record() |> NoFields.is_record()
       assert NoFields.StructyRecord.record() |> NoFields.is_record()
       assert {NoFields, :extra_field_is_NOT_checked_by_guard} |> NoFields.is_record()
@@ -167,6 +210,7 @@ defmodule StructyRecordTest do
 
   describe "record?/1" do
     test "checks if argument _strictly_ matches the shape of this record" do
+      assert NoFields.{} |> NoFields.record?()
       assert NoFields.record() |> NoFields.record?()
       assert NoFields.StructyRecord.record() |> NoFields.record?()
 
@@ -184,7 +228,7 @@ defmodule StructyRecordTest do
 
     test "support runtime evaluation via StructyRecord.index() fallback" do
       runtime = :one
-      assert OneField.index(runtime) == OneField.record(:one)
+      assert OneField.index(runtime) == OneField.StructyRecord.record(:one)
     end
   end
 
@@ -196,14 +240,14 @@ defmodule StructyRecordTest do
 
   describe "get/2" do
     test "to fetch the value of a given field in a given record" do
-      record = OneField.record()
+      record = OneField.{}
       assert record |> OneField.get(:one) == nil
     end
   end
 
   describe "set/2" do
     test "to update an existing record with the given fields and values" do
-      record = OneField.record()
+      record = OneField.{}
       updated_record = record |> OneField.set(one: 1)
       assert updated_record |> OneField.get(:one) == 1
     end
@@ -217,8 +261,8 @@ defmodule StructyRecordTest do
 
     defp test_runtime_record_creation_from_container(container) do
       contents = [one: 1] |> Enum.into(container)
-      assert OneField.from_list(contents) == OneField.record(one: 1)
-      assert OneField.from_list([]) == OneField.record()
+      assert OneField.from_list(contents) == OneField.{[one: 1]}
+      assert OneField.from_list([]) == OneField.{}
     end
 
     test "uses default field value when no value is specified in new contents" do
@@ -235,7 +279,7 @@ defmodule StructyRecordTest do
     end
 
     defp test_update_runtime_record(container) do
-      record = OneField.record()
+      record = OneField.{}
       assert record |> OneField.get_one() == nil
 
       updates = [one: 1] |> Enum.into(container)
@@ -254,21 +298,21 @@ defmodule StructyRecordTest do
 
   describe "to_list/1" do
     test "to convert a record into a Keyword list" do
-      record = NoFields.record()
+      record = NoFields.{}
       assert NoFields.to_list(record) == []
 
-      record = OneFieldWithDefaultValue.record()
+      record = OneFieldWithDefaultValue.{}
       assert OneFieldWithDefaultValue.to_list(record) == [one: 1]
     end
   end
 
   describe "inspect/2" do
     test "to pretty-print a record with its field names and values" do
-      record = NoFields.record()
+      record = NoFields.{}
       module = inspect(NoFields)
       assert NoFields.inspect(record) == "#{module}.record()"
 
-      record = OneField.record(one: 1)
+      record = OneField.{[one: 1]}
       assert OneField.inspect(record) == "#{inspect(OneField)}.record(one: 1)"
     end
   end
@@ -277,18 +321,18 @@ defmodule StructyRecordTest do
 
   describe "get_${field}/1" do
     test "to access a specific field in a given record" do
-      record = OneField.record()
+      record = OneField.{}
       assert record |> OneField.get_one() == nil
 
-      record = OneFieldWithDefaultValue.record()
+      record = OneFieldWithDefaultValue.{}
       assert record |> OneFieldWithDefaultValue.get_one() == 1
     end
   end
 
   describe "set_${field}/2" do
     test "to assign a specific field in a given record" do
-      record = OneField.record()
-      assert record |> OneField.set_one(1) == OneField.record(one: 1)
+      record = OneField.{}
+      assert record |> OneField.set_one(1) == OneField.{[one: 1]}
     end
   end
 end
