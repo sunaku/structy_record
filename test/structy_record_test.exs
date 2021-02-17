@@ -271,12 +271,12 @@ defmodule StructyRecordTest do
 
   describe "from_list/1" do
     test "to create a new record at runtime with the given fields and values" do
-      test_runtime_record_creation_from_container(Keyword.new())
-      test_runtime_record_creation_from_container(Map.new())
+      test_runtime_record_creation_from_collection(Keyword.new())
+      test_runtime_record_creation_from_collection(Map.new())
     end
 
-    defp test_runtime_record_creation_from_container(container) do
-      contents = [one: 1] |> Enum.into(container)
+    defp test_runtime_record_creation_from_collection(collection) do
+      contents = [one: 1] |> Enum.into(collection)
       assert OneField.from_list(contents) == OneField.{[one: 1]}
       assert OneField.from_list([]) == OneField.{}
     end
@@ -289,16 +289,23 @@ defmodule StructyRecordTest do
   end
 
   describe "merge/2" do
-    test "to assign the given fields and values inside a given record" do
-      test_merge_runtime_record(Keyword.new())
-      test_merge_runtime_record(Map.new())
+    test "accepts a record as input" do
+      record = OneField.{}
+      other = OneField.{[one: "other"]}
+      merged = record |> OneField.merge(other)
+      assert merged == other
     end
 
-    defp test_merge_runtime_record(container) do
+    test "accepts collections as input" do
+      test_runtime_record_merging_from_collection(Keyword.new())
+      test_runtime_record_merging_from_collection(Map.new())
+    end
+
+    defp test_runtime_record_merging_from_collection(collection) do
       record = OneField.{}
       assert record |> OneField.get_one() == nil
 
-      contents = [one: 1] |> Enum.into(container)
+      contents = [one: 1] |> Enum.into(collection)
       runtime_record = record |> OneField.merge(contents)
       assert runtime_record |> OneField.get_one() == 1
     end

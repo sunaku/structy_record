@@ -346,6 +346,10 @@ defmodule StructyRecord do
       @doc """
       Assigns the given fields and values _at runtime_ inside a given record.
       """
+      def merge(record, contents_or_record)
+
+      def merge(record, other = record()), do: merge(record, to_list(other))
+
       def merge(record, contents) do
         template = record |> StructyRecord_Definition.record()
         StructyRecord.from_list(contents, StructyRecord_Interface, template)
