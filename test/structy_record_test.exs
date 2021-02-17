@@ -2,6 +2,7 @@ alias TestHelper.NoFields
 alias TestHelper.NoFieldsWithCustomDoBlock
 alias TestHelper.OneField
 alias TestHelper.OneFieldWithDefaultValue
+alias TestHelper.TwoFields
 
 defmodule StructyRecordTest do
   use ExUnit.Case
@@ -116,6 +117,7 @@ defmodule StructyRecordTest do
   use NoFields
   use OneField
   use OneFieldWithDefaultValue
+  use TwoFields
 
   describe "{}/0" do
     test "to create a new record with default values for all fields" do
@@ -235,6 +237,20 @@ defmodule StructyRecordTest do
   describe "keypos/1" do
     test "to get the 1-based index of the given field in a record" do
       assert OneField.keypos(:one) == 1 + OneField.StructyRecord.record(:one)
+    end
+  end
+
+  describe "matchspec_head/1" do
+    test "1-hot-encoding with :_ wildcards for unmentioned fields" do
+      assert NoFields.matchspec_head([]) == NoFields.record()
+
+      assert OneField.matchspec_head([]) == OneField.record(one: :_)
+      assert OneField.matchspec_head(one: 1) == OneField.record(one: 1)
+
+      assert TwoFields.matchspec_head([]) == TwoFields.record(one: :_, two: :_)
+      assert TwoFields.matchspec_head(one: 1) == TwoFields.record(one: 1, two: :_)
+      assert TwoFields.matchspec_head(two: 2) == TwoFields.record(one: :_, two: 2)
+      assert TwoFields.matchspec_head(one: 1, two: 2) == TwoFields.record(one: 1, two: 2)
     end
   end
 

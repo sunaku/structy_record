@@ -6,6 +6,7 @@ defmodule TestHelper do
   StructyRecord.defrecord(NoFields, [])
   StructyRecord.defrecord(OneField, [:one])
   StructyRecord.defrecord(OneFieldWithDefaultValue, one: 1)
+  StructyRecord.defrecord(TwoFields, [:one, :two])
 
   StructyRecord.defrecord NoFieldsWithCustomDoBlock, [] do
     defmacro macro(arg) do

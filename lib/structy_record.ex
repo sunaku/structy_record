@@ -53,6 +53,7 @@ defmodule StructyRecord do
   - `set_${field}/2` to update the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
+  - `matchspec_head/1` to build a MatchHead expression for use in ETS MatchSpec
   - `to_list/0` to get a template of fields and default values for this record
   - `to_list/1` to convert a record into a list of its fields and values
 
@@ -147,6 +148,7 @@ defmodule StructyRecord do
   """
   defmacro defrecord(alias, fields, do_block \\ []) do
     definition = alias |> append_alias(:StructyRecord)
+    field_names = fields |> field_names()
 
     quote do
       require Record, as: StructyRecord_Record
@@ -168,8 +170,8 @@ defmodule StructyRecord do
         end
 
         unquote(record_primitives())
-        unquote(elixiry_interface())
-        unquote(field_accessors(fields))
+        unquote(elixiry_interface(field_names))
+        unquote(field_accessors(field_names))
         unquote(do_block)
       end
     end
@@ -259,10 +261,11 @@ defmodule StructyRecord do
     end
   end
 
-  defp elixiry_interface do
+  defp elixiry_interface(field_names) do
     quote do
       @record StructyRecord_Definition.record()
       @template StructyRecord_Definition.record(@record)
+      @matchspec_head_template unquote(field_names) |> Enum.map(&{&1, :_})
 
       @doc """
       Returns the zero-based index of the given field in this kind of record.
@@ -285,6 +288,17 @@ defmodule StructyRecord do
       defmacro keypos(field) do
         quote do
           1 + StructyRecord_Definition.record(unquote(field))
+        end
+      end
+
+      @doc """
+      Builds a MatchHead expression (for use in an ETS MatchSpec) where the
+      given fields & values are passed directly into the result and all the
+      unmentioned fields in the record definition are set to `:_` wildcards.
+      """
+      defmacro matchspec_head(contents) do
+        quote bind_quoted: [contents: contents, template: @matchspec_head_template] do
+          StructyRecord.from_list(contents, StructyRecord_Interface, template)
         end
       end
 
@@ -355,10 +369,9 @@ defmodule StructyRecord do
     end
   end
 
-  defp field_accessors(fields) do
-    names = fields |> field_names()
-    getters = names |> Enum.map(&getter_macro/1)
-    setters = names |> Enum.map(&setter_macro/1)
+  defp field_accessors(field_names) do
+    getters = field_names |> Enum.map(&getter_macro/1)
+    setters = field_names |> Enum.map(&setter_macro/1)
 
     quote do
       unquote(getters)
