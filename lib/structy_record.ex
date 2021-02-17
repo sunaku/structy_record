@@ -48,9 +48,9 @@ defmodule StructyRecord do
   - `record/2` to get the value of a given field in a given record
   - `record/2` to update an existing record with the given fields and values
   - `get/2` to fetch the value of a given field in a given record
-  - `set/2` to update an existing record with the given fields and values
+  - `put/2` to assign the given fields and values inside a given record
   - `get_${field}/1` to fetch the value of a specific field in a given record
-  - `set_${field}/2` to update the value of a specific field in a given record
+  - `put_${field}/2` to assign the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
   - `to_list/0` to get a template of fields and default values for this record
@@ -114,13 +114,13 @@ defmodule StructyRecord do
 
   Set values of fields in those instances:
 
-      Rectangle.{{even, width: 1}}       #-> {Rectangle, 1, 10}
-      even |> Rectangle.set_width(1)     #-> {Rectangle, 1, 10}
-      even |> Rectangle.record(width: 1) #-> {Rectangle, 1, 10}
+      Rectangle.{{even, width: 1}}    #-> {Rectangle, 1, 10}
+      even |> Rectangle.put(width: 1) #-> {Rectangle, 1, 10}
+      even |> Rectangle.put_width(1)  #-> {Rectangle, 1, 10}
 
       Rectangle.{{even, width: 1, height: 2}}                   #-> {Rectangle, 1, 2}
-      even |> Rectangle.set_width(1) |> Rectangle.set_height(2) #-> {Rectangle, 1, 2}
-      even |> Rectangle.record(width: 1, height: 2)             #-> {Rectangle, 1, 2}
+      even |> Rectangle.put(width: 1, height: 2)                #-> {Rectangle, 1, 2}
+      even |> Rectangle.put_width(1) |> Rectangle.put_height(2) #-> {Rectangle, 1, 2}
 
   Use your custom code on those instances:
 
@@ -321,7 +321,7 @@ defmodule StructyRecord do
       @doc """
       Updates the given record with the given fields and values.
       """
-      defmacro set(record, updates) do
+      defmacro put(record, updates) do
         quote do
           StructyRecord_Definition.record(unquote(record), unquote(updates))
         end
@@ -363,11 +363,11 @@ defmodule StructyRecord do
 
   defp field_accessors(field_names) do
     getters = field_names |> Enum.map(&getter_macro/1)
-    setters = field_names |> Enum.map(&setter_macro/1)
+    putters = field_names |> Enum.map(&putter_macro/1)
 
     quote do
       unquote(getters)
-      unquote(setters)
+      unquote(putters)
     end
   end
 
@@ -397,12 +397,12 @@ defmodule StructyRecord do
     end
   end
 
-  defp setter_macro(field) do
+  defp putter_macro(field) do
     quote do
       @doc """
       Updates the value of the `#{unquote(inspect(field))}` field in the given record.
       """
-      defmacro unquote(:"set_#{field}")(record, value) do
+      defmacro unquote(:"put_#{field}")(record, value) do
         quote do
           StructyRecord_Definition.record(unquote(record), unquote(value))
         end

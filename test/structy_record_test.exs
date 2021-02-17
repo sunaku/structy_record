@@ -261,10 +261,10 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe "set/2" do
+  describe "put/2" do
     test "to update an existing record with the given fields and values" do
       record = OneField.{}
-      updated_record = record |> OneField.set(one: 1)
+      updated_record = record |> OneField.put(one: 1)
       assert updated_record |> OneField.get(:one) == 1
     end
   end
@@ -345,10 +345,10 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe "set_${field}/2" do
+  describe "put_${field}/2" do
     test "to assign a specific field in a given record" do
       record = OneField.{}
-      assert record |> OneField.set_one(1) == OneField.{[one: 1]}
+      assert record |> OneField.put_one(1) == OneField.{[one: 1]}
     end
   end
 end
