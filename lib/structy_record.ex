@@ -39,14 +39,14 @@ defmodule StructyRecord do
   - `{}/1` to get the zero-based index of the given field in a record
   - `{{}}/1` to convert a record into a list of its fields and values
   - `{{}}/2` to get the value of a given field in a given record
-  - `{{}}/2` to update an existing record with the given fields and values
+  - `{{}}/2` to assign the given fields and values in a given record
   - `record?/1` to check if argument _strictly_ matches this record's shape
   - `record/0` to create a new record with default values for all fields
   - `record/1` to create a new record with the given fields and values
   - `record/1` to get the zero-based index of the given field in a record
   - `record/1` to convert a record into a list of its fields and values
   - `record/2` to get the value of a given field in a given record
-  - `record/2` to update an existing record with the given fields and values
+  - `record/2` to assign the given fields and values in a given record
   - `get/2` to fetch the value of a given field in a given record
   - `put/2` to assign the given fields and values inside a given record
   - `get_${field}/1` to fetch the value of a specific field in a given record
@@ -59,7 +59,7 @@ defmodule StructyRecord do
   Functions (available at runtime only):
   - `matchspec_head/1` to build a MatchHead expression for use in ETS MatchSpec
   - `from_list/1` to create a new record with the given fields and values
-  - `update/2` to update an existing record with the given fields and values
+  - `merge/2` to assign the given fields and values inside a given record
   - `inspect/2` to inspect the contents of a record using `Kernel.inspect/2`
 
   ## Examples
@@ -194,11 +194,11 @@ defmodule StructyRecord do
 
       @doc """
       Either fetches the value of a given field in a given record,
-      or updates the given record with the given fields and values.
+      or assigns the given fields and values inside a given record.
       """
-      defmacro {{record, field_or_updates}} do
+      defmacro {{record, field_or_contents}} do
         quote do
-          StructyRecord_Definition.record(unquote(record), unquote(field_or_updates))
+          StructyRecord_Definition.record(unquote(record), unquote(field_or_contents))
         end
       end
 
@@ -235,11 +235,11 @@ defmodule StructyRecord do
 
       @doc """
       Either fetches the value of a given field in a given record,
-      or updates the given record with the given fields and values.
+      or assigns the given fields and values inside a given record.
       """
-      defmacro record(record, field_or_updates) do
+      defmacro record(record, field_or_contents) do
         quote do
-          StructyRecord_Definition.record(unquote(record), unquote(field_or_updates))
+          StructyRecord_Definition.record(unquote(record), unquote(field_or_contents))
         end
       end
 
@@ -319,11 +319,11 @@ defmodule StructyRecord do
       end
 
       @doc """
-      Updates the given record with the given fields and values.
+      Assigns the given fields and values inside a given record.
       """
-      defmacro put(record, updates) do
+      defmacro put(record, contents) do
         quote do
-          StructyRecord_Definition.record(unquote(record), unquote(updates))
+          StructyRecord_Definition.record(unquote(record), unquote(contents))
         end
       end
 
@@ -344,11 +344,11 @@ defmodule StructyRecord do
       end
 
       @doc """
-      Updates the given record _at runtime_ with the given fields and values.
+      Assigns the given fields and values _at runtime_ inside a given record.
       """
-      def update(record, updates) do
+      def merge(record, contents) do
         template = record |> StructyRecord_Definition.record()
-        StructyRecord.from_list(updates, StructyRecord_Interface, template)
+        StructyRecord.from_list(contents, StructyRecord_Interface, template)
       end
 
       @doc """
@@ -400,7 +400,7 @@ defmodule StructyRecord do
   defp putter_macro(field) do
     quote do
       @doc """
-      Updates the value of the `#{unquote(inspect(field))}` field in the given record.
+      Assigns the value of the `#{unquote(inspect(field))}` field in the given record.
       """
       defmacro unquote(:"put_#{field}")(record, value) do
         quote do

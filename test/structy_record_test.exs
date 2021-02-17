@@ -288,18 +288,18 @@ defmodule StructyRecordTest do
     end
   end
 
-  describe "update/2" do
-    test "to update an existing record with the given fields and values" do
-      test_update_runtime_record(Keyword.new())
-      test_update_runtime_record(Map.new())
+  describe "merge/2" do
+    test "to assign the given fields and values inside a given record" do
+      test_merge_runtime_record(Keyword.new())
+      test_merge_runtime_record(Map.new())
     end
 
-    defp test_update_runtime_record(container) do
+    defp test_merge_runtime_record(container) do
       record = OneField.{}
       assert record |> OneField.get_one() == nil
 
-      updates = [one: 1] |> Enum.into(container)
-      runtime_record = record |> OneField.update(updates)
+      contents = [one: 1] |> Enum.into(container)
+      runtime_record = record |> OneField.merge(contents)
       assert runtime_record |> OneField.get_one() == 1
     end
   end
