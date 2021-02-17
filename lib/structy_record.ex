@@ -30,10 +30,10 @@ defmodule StructyRecord do
 
   The defined module provides the following guards, macros, and functions.
 
-  Guards:
+  Guards (available at compile time):
   - `is_record/1` to check if argument _loosely_ matches this record's shape
 
-  Macros:
+  Macros (available at compile time):
   - `{}/0` to create a new record with default values for all fields
   - `{}/1` to create a new record with the given fields and values
   - `{}/1` to get the zero-based index of the given field in a record
@@ -53,12 +53,12 @@ defmodule StructyRecord do
   - `set_${field}/2` to update the value of a specific field in a given record
   - `index/1` to get the zero-based index of the given field in a record
   - `keypos/1` to get the 1-based index of the given field in a record
-  - `matchspec_head/1` to build a MatchHead expression for use in ETS MatchSpec
   - `to_list/0` to get a template of fields and default values for this record
   - `to_list/1` to convert a record into a list of its fields and values
 
-  Functions:
-  - `from_list/1` to create a new record _at runtime_ with the given fields and values
+  Functions (available at runtime only):
+  - `matchspec_head/1` to build a MatchHead expression for use in ETS MatchSpec
+  - `from_list/1` to create a new record with the given fields and values
   - `update/2` to update an existing record with the given fields and values
   - `inspect/2` to inspect the contents of a record using `Kernel.inspect/2`
 
@@ -292,17 +292,6 @@ defmodule StructyRecord do
       end
 
       @doc """
-      Builds a MatchHead expression (for use in an ETS MatchSpec) where the
-      given fields & values are passed directly into the result and all the
-      unmentioned fields in the record definition are set to `:_` wildcards.
-      """
-      defmacro matchspec_head(contents) do
-        quote bind_quoted: [contents: contents, template: @matchspec_head_template] do
-          StructyRecord.from_list(contents, StructyRecord_Interface, template)
-        end
-      end
-
-      @doc """
       Returns a template of fields and default values for this kind of record.
       """
       defmacro to_list do
@@ -339,32 +328,35 @@ defmodule StructyRecord do
       end
 
       @doc """
+      Builds a MatchHead expression _at runtime_ for use in an ETS MatchSpec,
+      where the given fields & values are passed through verbatim and all the
+      unmentioned fields in the record definition are set to `:_` wildcards.
+      """
+      def matchspec_head(contents) do
+        StructyRecord.from_list(contents, StructyRecord_Interface, @matchspec_head_template)
+      end
+
+      @doc """
       Creates a new record _at runtime_ with the given fields and values.
       """
-      defmacro from_list(contents) do
-        quote bind_quoted: [contents: contents, template: @template] do
-          StructyRecord.from_list(contents, StructyRecord_Interface, template)
-        end
+      def from_list(contents) do
+        StructyRecord.from_list(contents, StructyRecord_Interface, @template)
       end
 
       @doc """
       Updates the given record _at runtime_ with the given fields and values.
       """
-      defmacro update(record, updates) do
-        quote bind_quoted: [record: record, updates: updates] do
-          template = record |> StructyRecord_Definition.record()
-          StructyRecord.from_list(updates, StructyRecord_Interface, template)
-        end
+      def update(record, updates) do
+        template = record |> StructyRecord_Definition.record()
+        StructyRecord.from_list(updates, StructyRecord_Interface, template)
       end
 
       @doc """
-      Inspects the contents of the given record using `Kernel.inspect/2`.
+      Inspects the given record's contents _at runtime_ using `Kernel.inspect/2`.
       """
-      defmacro inspect(record, options \\ []) do
-        quote bind_quoted: [record: record, options: options] do
-          contents = record |> StructyRecord_Definition.record()
-          StructyRecord.inspect(contents, StructyRecord_Interface, options)
-        end
+      def inspect(record, options \\ []) do
+        contents = record |> StructyRecord_Definition.record()
+        StructyRecord.inspect(contents, StructyRecord_Interface, options)
       end
     end
   end
