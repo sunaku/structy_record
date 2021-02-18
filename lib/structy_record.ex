@@ -408,9 +408,8 @@ defmodule StructyRecord do
     end
   end
 
-  @doc """
-  Returns the zero-based index of the given field in the given kind of record.
-  """
+  @doc false
+  # Returns the zero-based index of the given field in the given kind of record.
   def index(field, record_tag, record_template) do
     case find_index(record_template, field) do
       nil ->
@@ -429,18 +428,16 @@ defmodule StructyRecord do
     |> Enum.find_index(&match?({^field, _default_value}, &1))
   end
 
-  @doc """
-  Creates a new record of the given type with the given fields and values.
-  """
+  @doc false
+  # Creates a new record of the given type with the given fields and values.
   def from_list(contents, record_tag) do
     values = Keyword.values(contents)
     [record_tag | values] |> :erlang.list_to_tuple()
   end
 
-  @doc """
-  Creates a new record of the given type with the given fields and values
-  according to the given template of known fields and their default values.
-  """
+  @doc false
+  # Creates a new record of the given type with the given fields and values
+  # according to the given template of known fields and their default values.
   def from_list(contents, record_tag, record_template) do
     contents
     |> intersect(record_template)
@@ -455,9 +452,8 @@ defmodule StructyRecord do
     end)
   end
 
-  @doc """
-  Inspects the contents of the given record type using `Kernel.inspect/2`.
-  """
+  @doc false
+  # Inspects the contents of the given record type using `Kernel.inspect/2`.
   def inspect(contents, record_tag, options \\ []) when is_list(contents) do
     "#{inspect(record_tag)}.{#{inspect_contents(contents, options)}}"
   end
