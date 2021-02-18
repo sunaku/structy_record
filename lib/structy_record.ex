@@ -57,7 +57,6 @@ defmodule StructyRecord do
   - `to_list/1` to convert a record into a list of its fields and values
 
   Functions (available at runtime only):
-  - `matchspec_head/1` to build a MatchHead expression for use in ETS MatchSpec
   - `from_list/1` to create a new record with the given fields and values
   - `merge/2` to assign the given fields and values inside a given record
   - `inspect/2` to inspect the contents of a record using `Kernel.inspect/2`
@@ -170,7 +169,7 @@ defmodule StructyRecord do
         end
 
         unquote(record_primitives())
-        unquote(elixiry_interface(field_names))
+        unquote(elixiry_interface())
         unquote(field_accessors(field_names))
         unquote(do_block)
       end
@@ -261,11 +260,10 @@ defmodule StructyRecord do
     end
   end
 
-  defp elixiry_interface(field_names) do
+  defp elixiry_interface do
     quote do
       @record StructyRecord_Definition.record()
       @template StructyRecord_Definition.record(@record)
-      @matchspec_head_template unquote(field_names) |> Enum.map(&{&1, :_})
 
       @doc """
       Returns the zero-based index of the given field in this kind of record.
@@ -325,15 +323,6 @@ defmodule StructyRecord do
         quote do
           StructyRecord_Definition.record(unquote(record), unquote(contents))
         end
-      end
-
-      @doc """
-      Builds a MatchHead expression _at runtime_ for use in an ETS MatchSpec,
-      where the given fields & values are passed through verbatim and all the
-      unmentioned fields in the record definition are set to `:_` wildcards.
-      """
-      def matchspec_head(contents) do
-        StructyRecord.from_list(contents, StructyRecord_Interface, @matchspec_head_template)
       end
 
       @doc """
