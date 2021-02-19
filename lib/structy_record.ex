@@ -28,7 +28,7 @@ defmodule StructyRecord do
 
   ## Results
 
-  The defined module provides the following guards, macros, and functions.
+  The defined module contains the following guards, macros, and functions.
 
   Guards (available at compile time):
   - `is_record/1` to check if argument _loosely_ matches this record's shape
@@ -70,7 +70,7 @@ defmodule StructyRecord do
   Define a structy record for a rectangle:
 
       StructyRecord.defrecord Rectangle, [:width, :height] do
-        def area(r=record()) do
+        def area(r = record()) do
           get_width(r) * get_height(r)
         end
 

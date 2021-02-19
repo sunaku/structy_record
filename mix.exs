@@ -1,7 +1,7 @@
 defmodule StructyRecord.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @github "https://github.com/sunaku/structy_record"
 
   def project do
@@ -28,7 +28,7 @@ defmodule StructyRecord.MixProject do
     [
       source_ref: "v#{@version}",
       source_url: @github,
-      extras: ["README.md"],
+      extras: ["README.md", "CHANGELOG.md"],
       main: "readme"
     ]
   end

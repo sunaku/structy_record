@@ -7,13 +7,7 @@
 - Create and update records at runtime (not limited to compile time).
 - Calculate 1-based indexes to access record fields in `:ets` tables.
 
-To get started, see the documentation for `StructyRecord.defrecord/3`:
-
-    iex> h StructyRecord.defrecord
-
-The documentation is published at <https://hexdocs.pm/structy_record>.
-
-## Installation
+## Setup
 
 The package is [available in Hex](https://hex.pm/packages/structy_record) and can
 be installed by adding `structy_record` to your list of dependencies in `mix.exs`:
@@ -21,9 +15,118 @@ be installed by adding `structy_record` to your list of dependencies in `mix.exs
 ```elixir
 def deps do
   [
-    {:structy_record, "~> 0.1.0", runtime: false}
+    {:structy_record, "~> 0.2.0", runtime: false}
   ]
 end
+```
+
+## Usage
+
+To get started, see the [documentation] for `StructyRecord.defrecord/3`:
+
+```elixir
+iex> h StructyRecord.defrecord
+```
+
+[documentation]: https://hexdocs.pm/structy_record/StructyRecord.html
+
+### Examples
+
+Activate this macro in your environment:
+
+```elixir
+require StructyRecord
+```
+
+Define a structy record for a rectangle:
+
+```elixir
+StructyRecord.defrecord Rectangle, [:width, :height] do
+  def area(r = record()) do
+    get_width(r) * get_height(r)
+  end
+
+  def perimeter(record(width: w, height: h)) do
+    2 * (w + h)
+  end
+
+  def square?(record(width: same, height: same)), do: true
+  def square?(_), do: false
+end
+```
+
+Activate its macros in your environment:
+
+```elixir
+use Rectangle
+```
+
+Create instances of your structy record:
+
+```elixir
+rect = Rectangle.{}                        #-> {Rectangle, nil, nil}
+rect = Rectangle.{[]}                      #-> {Rectangle, nil, nil}
+no_h = Rectangle.{[width: 1]}              #-> {Rectangle, 1, nil}
+no_w = Rectangle.{[height: 2]}             #-> {Rectangle, nil, 2}
+wide = Rectangle.{[width: 10, height: 5]}  #-> {Rectangle, 10, 5}
+tall = Rectangle.{[width: 4, height: 25]}  #-> {Rectangle, 4, 25}
+even = Rectangle.{[width: 10, height: 10]} #-> {Rectangle, 10, 10}
+```
+
+Inspect the contents of those instances:
+
+```elixir
+rect |> Rectangle.inspect() #-> "Rectangle.{[width: nil, height: nil]}"
+no_h |> Rectangle.inspect() #-> "Rectangle.{[width: 1, height: nil]}"
+no_w |> Rectangle.inspect() #-> "Rectangle.{[width: nil, height: 2]}"
+wide |> Rectangle.inspect() #-> "Rectangle.{[width: 10, height: 5]}"
+tall |> Rectangle.inspect() #-> "Rectangle.{[width: 4, height: 25]}"
+even |> Rectangle.inspect() #-> "Rectangle.{[width: 10, height: 10]}"
+```
+
+Get values of fields in those instances:
+
+```elixir
+Rectangle.{{tall, :height}}       #-> 25
+Rectangle.{[height: h]} = tall; h #-> 25
+tall |> Rectangle.get_height()    #-> 25
+```
+
+Set values of fields in those instances:
+
+```elixir
+Rectangle.{{even, width: 1}}    #-> {Rectangle, 1, 10}
+even |> Rectangle.put(width: 1) #-> {Rectangle, 1, 10}
+even |> Rectangle.put_width(1)  #-> {Rectangle, 1, 10}
+
+Rectangle.{{even, width: 1, height: 2}}                   #-> {Rectangle, 1, 2}
+even |> Rectangle.put(width: 1, height: 2)                #-> {Rectangle, 1, 2}
+even |> Rectangle.put_width(1) |> Rectangle.put_height(2) #-> {Rectangle, 1, 2}
+```
+
+Use your custom code on those instances:
+
+```elixir
+rect |> Rectangle.area() #-> (ArithmeticError) bad argument in arithmetic expression: nil * nil
+no_h |> Rectangle.area() #-> (ArithmeticError) bad argument in arithmetic expression: 1 * nil
+no_w |> Rectangle.area() #-> (ArithmeticError) bad argument in arithmetic expression: nil * 2
+wide |> Rectangle.area() #-> 50
+tall |> Rectangle.area() #-> 100
+even |> Rectangle.area() #-> 100
+
+rect |> Rectangle.perimeter() #-> (ArithmeticError) bad argument in arithmetic expression: nil + nil
+no_h |> Rectangle.perimeter() #-> (ArithmeticError) bad argument in arithmetic expression: 1 + nil
+no_w |> Rectangle.perimeter() #-> (ArithmeticError) bad argument in arithmetic expression: nil + 2
+wide |> Rectangle.perimeter() #-> 30
+tall |> Rectangle.perimeter() #-> 58
+even |> Rectangle.perimeter() #-> 40
+
+rect |> Rectangle.square?() #-> true
+no_h |> Rectangle.square?() #-> false
+no_w |> Rectangle.square?() #-> false
+wide |> Rectangle.square?() #-> false
+tall |> Rectangle.square?() #-> false
+even |> Rectangle.square?() #-> true
 ```
 
 ## License
