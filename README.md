@@ -15,7 +15,7 @@ be installed by adding `structy_record` to your list of dependencies in `mix.exs
 ```elixir
 def deps do
   [
-    {:structy_record, "~> 0.2.0", runtime: false}
+    {:structy_record, "~> 0.2.0"}
   ]
 end
 ```
