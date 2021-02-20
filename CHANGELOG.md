@@ -1,3 +1,15 @@
+## Version 0.2.1 (2021-02-20)
+
+### Housekeeping:
+
+  * README: `runtime: false` suggestion broke releases.
+
+    The `runtime: false` flag in the user's `mix.exs` file prevents the
+    `structy_record` application (which bundles module `StructyRecord`)
+    from being included in app releases.  This breaks defined macros and
+    functions that delegate to the `StructyRecord.from_list/3` function
+    because the `StructyRecord` module won't be included in app releases!
+
 ## Version 0.2.0 (2021-02-18)
 
 This release adds a convenient new shorthand syntax for the `record()` macro,
